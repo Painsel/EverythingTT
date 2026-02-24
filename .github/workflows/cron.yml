@@ -1,0 +1,24 @@
+name: EverythingTT Cron
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Every 15 minutes
+  workflow_dispatch:
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: cd server && npm install
+      - name: Run Cron Script
+        run: node server/scripts/cron_jobs.js
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+          GITHUB_REPO_OWNER: ${{ secrets.GITHUB_REPO_OWNER }}
+          GITHUB_REPO_NAME: ${{ secrets.GITHUB_REPO_NAME }}
+          SERVER_PRIVATE_KEY: ${{ secrets.SERVER_PRIVATE_KEY }}
