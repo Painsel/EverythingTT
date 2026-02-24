@@ -24,7 +24,7 @@ const CONFIG = {
     githubToken: process.env.GITHUB_PAT,
     // Server Private Key (RSA) - In production, this comes from ENV
     serverPrivateKey: process.env.SERVER_PRIVATE_KEY,
-    // Internal DB Encryption Key (AES)
+    // Internal DB Encryption Key (AES) - 32 bytes hex string recommended
     dbEncryptionKey: process.env.DB_ENCRYPTION_KEY || 'development_secret_key_32_bytes!!' 
 };
 
@@ -32,6 +32,55 @@ const CONFIG = {
 const octokit = new Octokit({ auth: CONFIG.githubToken });
 
 // --- Security Helpers ---
+
+/**
+ * Encrypts data for At-Rest Storage (AES-256-GCM)
+ * @param {Object} data - JSON object to encrypt
+ * @returns {string} - Base64 encoded { iv, authTag, ciphertext }
+ */
+function encryptAtRest(data) {
+    const iv = crypto.randomBytes(12);
+    // Ensure key is 32 bytes
+    const key = crypto.scryptSync(CONFIG.dbEncryptionKey, 'salt', 32);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    
+    let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    const authTag = cipher.getAuthTag().toString('base64');
+    
+    return JSON.stringify({
+        iv: iv.toString('base64'),
+        authTag: authTag,
+        data: encrypted
+    });
+}
+
+/**
+ * Decrypts At-Rest Storage data (AES-256-GCM)
+ * @param {string} encryptedString - The JSON string stored in GitHub
+ * @returns {Object} - Decrypted JSON object
+ */
+function decryptAtRest(encryptedString) {
+    try {
+        const { iv, authTag, data } = JSON.parse(encryptedString);
+        const key = crypto.scryptSync(CONFIG.dbEncryptionKey, 'salt', 32);
+        const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'base64'));
+        
+        decipher.setAuthTag(Buffer.from(authTag, 'base64'));
+        
+        let decrypted = decipher.update(data, 'base64', 'utf8');
+        decrypted += decipher.final('utf8');
+        
+        return JSON.parse(decrypted);
+    } catch (e) {
+        // Fallback for unencrypted legacy data
+        try {
+            return JSON.parse(encryptedString);
+        } catch (e2) {
+            return null;
+        }
+    }
+}
 
 /**
  * Decrypts the incoming payload using Hybrid Decryption (RSA + AES)
@@ -228,7 +277,8 @@ app.get('/api/db/read', async (req, res) => {
         });
         
         const content = Buffer.from(data.content, 'base64').toString('utf-8');
-        res.json(JSON.parse(content));
+        // Decrypt At-Rest Data
+        res.json(decryptAtRest(content));
     } catch (error) {
         res.status(404).json({ error: 'Not found' });
     }

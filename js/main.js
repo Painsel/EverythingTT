@@ -1,8 +1,8 @@
 /**
  * Main Entry Point
  */
-import Router from './core/router/index.js';
-import Auth from './core/auth/session.js';
+import Router from './router.js';
+import Auth from './auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('EverythingTT SPA Initializing...');

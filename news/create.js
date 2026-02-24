@@ -1,7 +1,7 @@
 /**
  * News Module - Create
  */
-import API from '../../core/api/client.js';
+import API from '../js/api.js';
 
 export default {
     init: (container) => {
