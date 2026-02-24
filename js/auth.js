@@ -81,7 +81,10 @@ class AuthManager {
         if (!this.supabase) return;
         // Example: Sign in with GitHub
         await this.supabase.auth.signInWithOAuth({
-            provider: 'github'
+            provider: 'github',
+            options: {
+                redirectTo: window.location.href
+            }
         });
     }
 
