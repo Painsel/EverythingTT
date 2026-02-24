@@ -1,0 +1,202 @@
+/* News App - Journalism Styles */
+:root {
+    --bg-color: #f9f9f9;
+    --text-primary: #111;
+    --text-secondary: #555;
+    --accent: #000;
+    --border-color: #ddd;
+    --font-serif: 'Merriweather', Georgia, serif;
+    --font-sans: 'Helvetica Neue', Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-serif);
+    line-height: 1.6;
+}
+
+/* Header */
+header {
+    background-color: #fff;
+    border-bottom: 1px solid #000;
+    padding: 1rem 0;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-family: 'UnifrakturMaguntia', cursive; /* Old English style */
+    font-size: 3rem;
+    color: black;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+nav {
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding: 0.5rem 0;
+    margin-top: 1rem;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+nav a {
+    color: #333;
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+nav a:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
+/* Layout */
+.container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+/* Article List */
+.news-article {
+    background: #fff;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.05);
+}
+
+.news-article h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+.news-article h2 a {
+    color: #000;
+    text-decoration: none;
+}
+
+.news-article h2 a:hover {
+    text-decoration: underline;
+}
+
+.meta {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.excerpt {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    font-family: var(--font-sans);
+    font-weight: bold;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: 1px solid #000;
+}
+
+.btn-primary {
+    background-color: #000;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #333;
+}
+
+.btn-secondary {
+    background-color: #fff;
+    color: #000;
+}
+
+.btn-secondary:hover {
+    background-color: #f0f0f0;
+}
+
+/* Editor */
+.card {
+    background: #fff;
+    padding: 2rem;
+    border: 1px solid #ccc;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 2rem;
+    font-family: var(--font-serif);
+    border: none;
+    border-bottom: 1px solid #ccc;
+    outline: none;
+    background: transparent;
+    margin-bottom: 1rem;
+}
+
+.editor-toolbar {
+    background: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    display: flex;
+    gap: 10px;
+}
+
+.editor-content {
+    min-height: 500px;
+    border: 1px solid #ccc;
+    padding: 2rem;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    background: #fff;
+    outline: none;
+}
+
+/* Article View */
+article h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.article-content {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-top: 2rem;
+}
+
+.article-content p {
+    margin-bottom: 1.5rem;
+}

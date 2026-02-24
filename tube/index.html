@@ -4,25 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tube - EverythingTT</title>
-    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <div class="logo">EverythingTT Tube</div>
-        <nav>
-            <ul>
-                <li><a href="../index.html">Home</a></li>
-                <li><a href="index.html" class="active">Tube</a></li>
-                <li><a href="studio.html">Studio</a></li>
-            </ul>
-        </nav>
-        <div class="user-panel"></div>
+        <a href="index.html" class="logo">
+            <div style="width: 30px; height: 20px; background: red; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 6px solid white;"></div>
+            </div>
+            <span>Tube</span>
+        </a>
+        
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" placeholder="Search">
+                <button class="search-btn">🔍</button>
+            </div>
+        </div>
+
+        <div class="user-panel">
+            <a href="studio.html" class="btn-upload">+ Create</a>
+            <!-- Auth injected here -->
+        </div>
     </header>
 
-    <main class="container">
-        <!-- Content injected by JS -->
-    </main>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <a href="index.html" class="nav-item active">🏠 Home</a>
+            <a href="#" class="nav-item">🔥 Shorts</a>
+            <a href="#" class="nav-item">📺 Subscriptions</a>
+            <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
+            <a href="#" class="nav-item">📚 Library</a>
+            <a href="#" class="nav-item">🕒 History</a>
+        </aside>
+
+        <main class="main-content">
+            <!-- Video Grid injected by JS -->
+        </main>
+    </div>
 
     <script type="module" src="index.js"></script>
 </body>

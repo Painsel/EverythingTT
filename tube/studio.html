@@ -3,26 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio - EverythingTT Tube</title>
-    <link rel="stylesheet" href="../assets/style.css">
+    <title>Studio - Tube</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <div class="logo">Tube Studio</div>
-        <nav>
-            <ul>
-                <li><a href="../index.html">Home</a></li>
-                <li><a href="index.html">Tube</a></li>
-                <li><a href="studio.html" class="active">Studio</a></li>
-            </ul>
-        </nav>
-        <div class="user-panel"></div>
+        <a href="index.html" class="logo">
+            <span>Tube Studio</span>
+        </a>
+        <div class="user-panel">
+            <!-- Auth injected -->
+        </div>
     </header>
 
-    <main class="container">
-        <!-- Content injected by JS -->
-    </main>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <a href="#" class="nav-item active">📊 Dashboard</a>
+            <a href="#" class="nav-item">▶️ Content</a>
+            <a href="#" class="nav-item">📈 Analytics</a>
+            <a href="#" class="nav-item">💬 Comments</a>
+            <a href="#" class="nav-item">💲 Earn</a>
+        </aside>
+
+        <main class="main-content">
+            <!-- Content injected by JS -->
+        </main>
+    </div>
 
     <script type="module" src="studio.js"></script>
 </body>

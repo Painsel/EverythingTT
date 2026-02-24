@@ -1,0 +1,188 @@
+/* Eco App - Casino & Dashboard Styles */
+:root {
+    --bg-color: #0b1a10; /* Dark Green Felt */
+    --panel-bg: #142b1a;
+    --accent: #ffd700; /* Gold */
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --card-bg: #1e3a26;
+    --border-color: #2e5a36;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    background-image: radial-gradient(circle at 50% 50%, #142b1a 0%, #0b1a10 100%);
+}
+
+/* Header */
+header {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--accent);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    color: var(--accent);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+nav a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+nav a:hover, nav a.active {
+    color: var(--accent);
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Cards */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+    border-color: var(--accent);
+}
+
+h1 {
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+    text-align: center;
+}
+
+h3 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+    border: none;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #ffd700, #b8860b);
+    color: #000;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 2px solid var(--text-secondary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Casino Specific */
+.casino-table {
+    background-color: #1a4d2e;
+    border: 8px solid #4a3b2a;
+    border-radius: 50px;
+    padding: 3rem;
+    position: relative;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+}
+
+.card-slot {
+    background: white;
+    color: black;
+    width: 80px;
+    height: 120px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0 10px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+}
+
+.chat-room {
+    border: 1px solid var(--border-color);
+    background: rgba(0,0,0,0.2);
+}
+
+.eco-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 1.1rem;
+}
+
+.eco-stat span:last-child {
+    color: var(--accent);
+    font-weight: bold;
+}
