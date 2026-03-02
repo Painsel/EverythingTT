@@ -66,11 +66,14 @@
                 <section class="space-y-3">
                     <h4 class="text-lg font-bold text-white flex items-center gap-2">
                         <span class="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs">2</span>
-                        Market Exchange
+                        Affordability & Auctions
                     </h4>
                     <p class="text-sm text-slate-400 leading-relaxed">
-                        The center console provides live conversion between USD, ETT Tokens, and Gold. 
-                        Rates are pegged to current market standard: <code class="text-indigo-300">4100 ETT = $5.99</code> and <code class="text-yellow-400">1000 Gold = $1.99</code>.
+                        The right console calculates your "buying power" based on the record-high bids in recent Discord auctions (Clan Logos, Roles, and Emojis). 
+                        It estimates how many auctions you could win with your current gold reserve.
+                    </p>
+                    <p class="text-[10px] text-indigo-400/80 bg-indigo-400/5 p-2 rounded-lg border border-indigo-400/10">
+                        <strong>Discord Auctions:</strong> Auctions are held in the main Territorial.io server. Join to verify current rates: <a href="https://discord.gg/DGTMnG9avc" target="_blank" class="text-indigo-300 underline">discord.gg/DGTMnG9avc</a>.
                     </p>
                 </section>
 
@@ -728,7 +731,12 @@
 
             <!-- Right: Assets -->
             <div class="col-assets card card-p8" style="background-color: rgba(79, 70, 229, 0.05); border: 1px solid rgba(79, 70, 229, 0.2); min-height: 500px;">
-                <h3 class="label-tiny" style="margin-bottom: 1.5rem;">Affordability Analysis</h3>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="label-tiny">Affordability Analysis</h3>
+                    <a href="https://discord.gg/DGTMnG9avc" target="_blank" class="btn-text" style="font-size: 8px; color: #5865F2; border: 1px solid rgba(88, 101, 242, 0.2); padding: 2px 6px; border-radius: 4px;">
+                        Discord Auctions
+                    </a>
+                </div>
                 
                 <div id="tier-box" style="padding: 1.5rem; border-radius: 1.5rem; background-color: rgba(79, 70, 229, 0.02); border: 1px solid rgba(79, 70, 229, 0.05); margin-bottom: 2rem; text-align: center; transition: all 0.5s;">
                     <div id="tier-name" class="text-indigo" style="font-size: 1.5rem; font-weight: 700; letter-spacing: 0.1em;">Analysing...</div>
@@ -737,22 +745,26 @@
 
                 <div class="grid" style="grid-template-cols: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
                     <div style="background-color: rgba(2, 6, 23, 0.5); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <div class="label-tiny" style="font-size: 8px; color: #64748b; margin-bottom: 0.25rem;">Logo Credits</div>
+                        <div class="label-tiny" style="font-size: 8px; color: #64748b; margin-bottom: 0.25rem;">Logo Auctions Won</div>
                         <div id="buy-logos" class="text-indigo" style="font-size: 1.25rem; font-family: monospace;">0</div>
                     </div>
                     <div style="background-color: rgba(2, 6, 23, 0.5); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <div class="label-tiny" style="font-size: 8px; color: #64748b; margin-bottom: 0.25rem;">Custom Roles</div>
+                        <div class="label-tiny" style="font-size: 8px; color: #64748b; margin-bottom: 0.25rem;">Role Auctions Won</div>
                         <div id="buy-roles" class="text-indigo" style="font-size: 1.25rem; font-family: monospace;">0</div>
                     </div>
                     <div style="background-color: rgba(2, 6, 23, 0.5); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <div class="label-tiny" style="font-size: 8px; color: #64748b; margin-bottom: 0.25rem;">Rare Emojis</div>
+                        <div class="label-tiny" style="font-size: 8px; color: #64748b; margin-bottom: 0.25rem;">Emoji Auctions Won</div>
                         <div id="buy-emojis" class="text-indigo" style="font-size: 1.25rem; font-family: monospace;">0</div>
                     </div>
                     <div style="background-color: rgba(2, 6, 23, 0.5); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <div class="label-tiny" style="font-size: 8px; color: #64748b; margin-bottom: 0.25rem;">Nitro Months</div>
+                        <div class="label-tiny" style="font-size: 8px; color: #64748b; margin-bottom: 0.25rem;">Nitro Purchases</div>
                         <div id="buy-nitro" class="text-indigo" style="font-size: 1.25rem; font-family: monospace;">0</div>
                     </div>
                 </div>
+
+                <p class="text-slate-500" style="font-size: 8px; line-height: 1.4; margin-bottom: 1.5rem; text-align: center;">
+                    Calculated based on record-high bids in Discord auctions. These values estimate how many top-tier auctions this account could win simultaneously.
+                </p>
 
                 <div class="mt-auto flex-col gap-2">
                     <div class="flex justify-between label-tiny" style="color: #64748b;">
