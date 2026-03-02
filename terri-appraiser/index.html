@@ -23,7 +23,7 @@
     <meta property="twitter:image" content="https://fdodsmjxbxknnqfnzdtr.supabase.co/storage/v1/object/public/AudiosAndNotifs/Tokens/valentine.gif">
 
     <!-- Security & Integrity -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://pagedrop.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://pagedrop.io; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fdodsmjxbxknnqfnzdtr.supabase.co https://pagedrop.io; connect-src 'self' https://territorial.io https://pagedrop.io;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://pagedrop.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://pagedrop.io; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fdodsmjxbxknnqfnzdtr.supabase.co https://pagedrop.io; connect-src 'self' https://territorial.io https://pagedrop.io https://api-inference.huggingface.co;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -541,10 +541,16 @@
             <p class="text-slate-400" style="font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.6; font-weight: 500;">Real-Time Account Worth & Market Exchange</p>
             
             <!-- Help Button -->
-            <button onclick="document.getElementById('helpModal').classList.remove('hidden-modal')" 
-                class="absolute" style="right: 0; top: 0; padding: 0.75rem; background-color: rgba(30, 41, 59, 0.5); border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; box-shadow: var(--shadow-xl);" title="How it works">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-            </button>
+            <div class="absolute" style="right: 0; top: 0; display: flex; gap: 0.5rem;">
+                <button onclick="AI.toggleChat()" 
+                    class="p-3 bg-indigo-600/20 hover:bg-indigo-600/40 rounded-full border border-indigo-500/20 transition-all cursor-pointer shadow-lg group" title="Chat with AI Analyst">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 group-hover:text-white"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </button>
+                <button onclick="document.getElementById('helpModal').classList.remove('hidden-modal')" 
+                    class="p-3 bg-slate-800/50 hover:bg-slate-700 rounded-full border border-white/5 transition-all cursor-pointer shadow-lg" title="How it works">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </button>
+            </div>
         </div>
 
         <div class="grid">
@@ -823,6 +829,33 @@
         Analysis Done!
     </div>
 
+    <!-- AI CHAT MODAL -->
+    <div id="aiChatModal" class="modal-overlay hidden-modal" style="z-index: 150;">
+        <div class="modal-content" style="max-width: 400px; height: 500px;">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: white;">Appraiser AI</h3>
+                    <p class="label-tiny" style="color: #64748b;">Powered by Ollama</p>
+                </div>
+                <button onclick="AI.toggleChat()" class="btn-text p-2" style="border-radius: 9999px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            
+            <div id="ai-messages" style="flex: 1; overflow-auto; display: flex; flex-direction: column; padding-right: 0.5rem; margin-bottom: 1rem;" class="custom-scrollbar">
+                <!-- Messages dynamic -->
+            </div>
+
+            <div class="flex gap-2">
+                <input type="text" id="ai-input" placeholder="Ask about the market..." 
+                    class="input-text" style="flex: 1;" onkeypress="if(event.key === 'Enter') AI.sendMessage()">
+                <button onclick="AI.sendMessage()" class="btn-primary" style="width: auto; padding: 0.5rem 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- SHARE MODAL -->
     <div id="shareOverlay" class="modal-overlay hidden-modal">
         <div class="modal-content max-w-md" style="padding: 2rem; text-align: center;">
@@ -847,6 +880,7 @@
         </div>
     </div>
 
+    <script src="ai-controller.js"></script>
     <script>
         /**
          * PAGEDROP INTEGRATION
