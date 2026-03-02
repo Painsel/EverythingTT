@@ -23,7 +23,7 @@
     <meta property="twitter:image" content="https://fdodsmjxbxknnqfnzdtr.supabase.co/storage/v1/object/public/AudiosAndNotifs/Tokens/valentine.gif">
 
     <!-- Security & Integrity -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://pagedrop.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://pagedrop.io; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fdodsmjxbxknnqfnzdtr.supabase.co https://pagedrop.io; connect-src 'self' https://territorial.io https://pagedrop.io https://api-inference.huggingface.co;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://pagedrop.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://pagedrop.io; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fdodsmjxbxknnqfnzdtr.supabase.co https://pagedrop.io; connect-src 'self' https://territorial.io https://pagedrop.io https://api-inference.huggingface.co https://router.huggingface.co;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -587,8 +587,8 @@
                             <button type="button" onclick="document.getElementById('import-config').click()" class="btn-text" style="color: var(--primary-hover); font-size: 9px;">Import JSON</button>
                             <input type="file" id="import-config" class="hidden" accept=".json">
                         </div>
-                        <input type="text" id="api-username" name="username" placeholder="Your Account Name" class="input-text">
-                        <input type="password" id="api-password" name="password" placeholder="Your Password" class="input-text">
+                        <input type="text" id="api-username" name="username" placeholder="Your Account Name" class="input-text" autocomplete="username">
+                        <input type="password" id="api-password" name="password" placeholder="Your Password" class="input-text" autocomplete="current-password">
                         
                         <div class="flex" style="gap: 0.5rem; padding-top: 0.25rem; align-items: flex-start;">
                             <input type="checkbox" id="consent-save" style="margin-top: 0.125rem; width: 0.75rem; height: 0.75rem; border-radius: 0.25rem; border: 1px solid #334155; background-color: #020617;">

@@ -8,10 +8,10 @@
 const AI_CONFIG = {
     // Using a fast, high-quality open model
     model: "HuggingFaceH4/zephyr-7b-beta", 
-    endpoint: "https://api-inference.huggingface.co/models/",
+    endpoint: "https://router.huggingface.co/hf/models/",
     // NOTE: For a public GitHub site, you can use a free token here.
     // Visitors will be able to see it, so use a dedicated 'Public' token from HF.
-    token: "hf_VYourFreeTokenHere" 
+    token: "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" 
 };
 
 const APPRAISER_SYSTEM_PROMPT = `
