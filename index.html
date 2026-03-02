@@ -3,60 +3,806 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EverythingTT - Infinite Uptime</title>
-    <link rel="stylesheet" href="assets/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Territorial.io Loot & Exchange | Real-Time Account Appraisal</title>
+    <meta name="description" content="Official community tool for Territorial.io account valuation, ETT token conversion, and real-time market appraisal. Securely analyze your account worth.">
+    <meta name="keywords" content="territorial.io, account appraisal, game valuation, ETT token, gold reserve, clan rank, loot calculator">
+    <meta name="author" content="Territorial Appraiser Community">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://territorial.app/">
+    <meta property="og:title" content="Territorial.io Loot & Exchange | Real-Time Account Appraisal">
+    <meta property="og:description" content="Calculate your account worth, convert ETT tokens, and analyze market trends for Territorial.io in real-time.">
+    <meta property="og:image" content="https://fdodsmjxbxknnqfnzdtr.supabase.co/storage/v1/object/public/AudiosAndNotifs/Tokens/valentine.gif">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Territorial.io Loot & Exchange | Real-Time Account Appraisal">
+    <meta property="twitter:description" content="Calculate your account worth, convert ETT tokens, and analyze market trends for Territorial.io in real-time.">
+    <meta property="twitter:image" content="https://fdodsmjxbxknnqfnzdtr.supabase.co/storage/v1/object/public/AudiosAndNotifs/Tokens/valentine.gif">
+
+    <!-- Security & Integrity -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%234f46e5'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='50' fill='white' font-family='Arial'>T</text></svg>">
+    
+    <!-- Structured Data (JSON-LD) for SEO Legitimacy -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Territorial Appraiser",
+      "applicationCategory": "GameTool",
+      "operatingSystem": "All",
+      "description": "A valuation and appraisal tool for Territorial.io accounts and assets.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+        
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            font-family: 'Space Grotesk', sans-serif;
+            background-image: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #020617 100%);
+            transition: background-color 0.5s ease;
+            overflow-x: hidden;
+        }
+        .card-glow {
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .token-anim {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .loading-shimmer {
+            background: linear-gradient(90deg, #4f46e5, #818cf8, #4f46e5);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(12px);
+        }
+        .modal-content {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+        .hidden-modal {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .hidden-modal .modal-content {
+            transform: scale(0.9) translateY(20px);
+        }
+        
+        .json-key { color: #818cf8; }
+        .json-num { color: #fbbf24; }
+        .json-str { color: #34d399; }
+        pre { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+
+        .prestige-badge {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+    </style>
 </head>
-<body>
+<body id="main-app" class="flex items-center justify-center min-h-screen p-4 md:p-10">
 
-    <header>
-        <div class="logo">EverythingTT</div>
-        <nav>
-            <ul>
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="eco/index.html">Economy</a></li>
-                <li><a href="tube/index.html">Tube</a></li>
-                <li><a href="news/index.html">News</a></li>
-            </ul>
-        </nav>
-        <div class="user-panel">
-            <!-- Auth State Injected Here -->
+    <div class="w-full max-w-6xl space-y-8 py-10">
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tighter text-white uppercase">
+                Territorial<span class="text-indigo-500">Appraiser</span>
+            </h1>
+            <p class="text-slate-400 text-xs tracking-[0.3em] uppercase opacity-60 font-medium">Real-Time Account Worth & Market Exchange</p>
         </div>
-    </header>
 
-    <main class="container">
-        <section class="hero">
-            <h1>Welcome to EverythingTT</h1>
-            <p>The infinite platform for trading, watching, and creating.</p>
-            <div class="cta-group">
-                <a href="eco/index.html" class="btn btn-primary">Start Trading</a>
-                <a href="tube/index.html" class="btn btn-secondary">Watch Videos</a>
-            </div>
-        </section>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left: Account Appraisal -->
+            <div class="lg:col-span-4 bg-slate-900/80 backdrop-blur-2xl p-6 rounded-[2.5rem] card-glow space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">API Integration</h3>
+                    <div id="status-dot" class="h-2 w-2 rounded-full bg-slate-600"></div>
+                </div>
 
-        <div class="grid">
-            <div class="card">
-                <h3>💰 Economy</h3>
-                <p>Trade ETT Coins & Territorial.io Gold. Play Casino, buy Marketplace items.</p>
-                <a href="eco/index.html" class="mt-1">Go to Economy &rarr;</a>
+                <div class="p-4 bg-slate-800/40 rounded-2xl border border-white/5 space-y-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-[10px] text-slate-400 font-bold uppercase">Account Access</label>
+                        <button onclick="document.getElementById('import-config').click()" class="text-[9px] text-indigo-400 hover:text-indigo-300 font-bold uppercase transition-colors">Import JSON</button>
+                        <input type="file" id="import-config" class="hidden" accept=".json">
+                    </div>
+                    <input type="text" id="api-username" placeholder="Your Account Name" 
+                        class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-2 px-3 text-xs font-bold focus:ring-1 focus:ring-indigo-500 outline-none text-white transition-all">
+                    <input type="password" id="api-password" placeholder="Your Password" 
+                        class="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-2 px-3 text-xs font-bold focus:ring-1 focus:ring-indigo-500 outline-none text-white transition-all">
+                    
+                    <div class="flex items-start gap-2 pt-1">
+                        <input type="checkbox" id="consent-save" class="mt-0.5 w-3 h-3 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500">
+                        <label for="consent-save" class="text-[9px] text-slate-400 leading-tight cursor-pointer">
+                            I consent to local data handling. Download credentials as <code>credentials.json</code> for auto-fill on next visit.
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="relative group">
+                        <label class="text-[9px] font-bold text-slate-500 uppercase ml-2 mb-1 block">Target to Scan</label>
+                        <input type="text" id="target-username" placeholder="Target Username" 
+                            class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-4 px-5 text-base font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-white shadow-2xl transition-all">
+                    </div>
+                    
+                    <button id="fetch-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-2xl transition-all font-bold flex items-center justify-center gap-3 shadow-xl shadow-indigo-950/40 active:scale-95 group">
+                        <span id="btn-text">FETCH API DATA</span>
+                        <svg class="group-hover:rotate-12 transition-transform" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Appraisal Results Area -->
+                <div id="appraisal-result" class="hidden space-y-4 pt-6 border-t border-white/5 animate-in fade-in slide-in-from-bottom-4 duration-700 overflow-hidden">
+                    <div class="flex justify-between items-end">
+                        <div class="max-w-[60%] overflow-hidden">
+                            <p class="text-[9px] text-slate-500 font-bold uppercase">Game Username</p>
+                            <h4 id="res-user" class="text-xl font-bold text-white truncate">---</h4>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[9px] text-slate-500 font-bold uppercase">Gold Reserve</p>
+                            <h4 id="res-gold" class="text-lg font-bold text-yellow-500">0</h4>
+                        </div>
+                    </div>
+
+                    <!-- Valuation Detail Grid -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                            <div class="text-[8px] text-slate-500 uppercase font-black">Clan Member Rank A</div>
+                            <div id="res-clan-rank" class="text-xs font-bold text-indigo-300">#---</div>
+                        </div>
+                        <div class="p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                            <div class="text-[8px] text-slate-500 uppercase font-black">Leader Points</div>
+                            <div id="res-leader-pts" class="text-xs font-bold text-pink-300">0</div>
+                        </div>
+                        <div class="p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                            <div class="text-[8px] text-slate-500 uppercase font-black">Gold Rank</div>
+                            <div id="res-gold-rank-val" class="text-xs font-bold text-amber-300">#---</div>
+                        </div>
+                        <div class="p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                            <div class="text-[8px] text-slate-500 uppercase font-black">Admin Level</div>
+                            <div id="res-admin-rank" class="text-xs font-bold text-emerald-400">#---</div>
+                        </div>
+                    </div>
+
+                    <!-- Name Factor Feature -->
+                    <div class="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[9px] font-black text-indigo-400 uppercase">Linguistic Rarity</span>
+                            <span id="res-name-bonus" class="text-sm font-bold text-indigo-300">+$0.00</span>
+                        </div>
+                        <div id="res-name-tags" class="flex flex-wrap gap-1.5">
+                            <!-- JS Badges -->
+                        </div>
+                    </div>
+
+                    <div class="p-5 bg-gradient-to-br from-indigo-600/20 to-emerald-600/20 rounded-[2rem] border border-white/10 text-center shadow-inner relative overflow-hidden prestige-badge">
+                        <div class="text-[10px] uppercase text-slate-400 font-black mb-1">Estimated Account Worth</div>
+                        <div id="res-val" class="text-3xl font-bold text-emerald-400">$0.00</div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button id="debug-btn" class="flex-1 py-2 text-[9px] font-bold text-slate-600 hover:text-indigo-400 uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                            Inspect JSON
+                        </button>
+                        <button id="publish-btn" class="flex-1 py-2 text-[9px] font-bold text-slate-600 hover:text-emerald-400 uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                            Publish Report
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-                <h3>📺 Tube</h3>
-                <p>Share videos, shorts, and music. Monetize with Memberships.</p>
-                <a href="tube/index.html" class="mt-1">Go to Tube &rarr;</a>
+
+            <!-- Center: Rate Calculator -->
+            <div class="lg:col-span-4 bg-slate-900/80 backdrop-blur-2xl p-8 rounded-[2.5rem] card-glow space-y-8">
+                <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Rate Conversion</h3>
+                
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase flex justify-between px-1">USD Market Value <span id="usd-formatted" class="text-emerald-500 font-black"></span></label>
+                        <div class="relative group">
+                            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-xl">$</span>
+                            <input type="number" id="usd" placeholder="0.00" class="w-full bg-slate-950 border border-slate-700 rounded-3xl py-5 pl-12 pr-6 text-2xl font-bold focus:ring-4 focus:ring-indigo-500/20 outline-none text-white transition-all">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase flex justify-between px-1">ETT Tokens <span id="ett-formatted" class="text-pink-400 font-black"></span></label>
+                        <div class="relative group">
+                            <img src="https://fdodsmjxbxknnqfnzdtr.supabase.co/storage/v1/object/public/AudiosAndNotifs/Tokens/valentine.gif" class="absolute right-6 top-1/2 -translate-y-1/2 w-8 h-8 token-anim">
+                            <input type="number" id="ett" placeholder="0" class="w-full bg-slate-950 border border-slate-700 rounded-3xl py-5 px-6 text-2xl font-bold focus:ring-4 focus:ring-pink-500/20 outline-none text-white transition-all">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase flex justify-between px-1">Gold Reserve 🧈 <span id="gold-formatted" class="text-yellow-400 font-black"></span></label>
+                        <input type="number" id="gold" placeholder="0" class="w-full bg-slate-950 border border-slate-700 rounded-3xl py-5 px-6 text-2xl font-bold focus:ring-4 focus:ring-yellow-500/20 outline-none text-white transition-all">
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-950 rounded-2xl border border-white/5 space-y-3">
+                    <div class="flex justify-between text-[10px] font-bold">
+                        <span class="text-slate-500">MARKET RATE 1</span>
+                        <span class="text-indigo-400">4100 ETT = $5.99</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-bold">
+                        <span class="text-slate-500">MARKET RATE 2</span>
+                        <span class="text-yellow-500">1000 GOLD = $1.99</span>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-                <h3>📰 News</h3>
-                <p>Independent journalism platform. Write articles and share your truth.</p>
-                <a href="news/index.html" class="mt-1">Read News &rarr;</a>
+
+            <!-- Right: Assets -->
+            <div class="lg:col-span-4 bg-indigo-900/10 backdrop-blur-xl p-8 rounded-[2.5rem] border border-indigo-500/20 flex flex-col h-full min-h-[500px]">
+                <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-6">Affordability Analysis</h3>
+                
+                <div id="tier-box" class="p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 mb-8 text-center transition-all duration-500">
+                    <div id="tier-name" class="text-2xl font-bold text-indigo-300 uppercase tracking-widest">Analysing...</div>
+                    <div id="tier-desc" class="text-slate-500 text-xs italic mt-2 leading-relaxed">"Calculating buying power in the current economy."</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                        <div class="text-[8px] text-slate-500 uppercase font-black mb-1">Logo Credits</div>
+                        <div id="buy-logos" class="text-xl font-mono text-indigo-300">0</div>
+                    </div>
+                    <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                        <div class="text-[8px] text-slate-500 uppercase font-black mb-1">Custom Roles</div>
+                        <div id="buy-roles" class="text-xl font-mono text-indigo-300">0</div>
+                    </div>
+                    <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                        <div class="text-[8px] text-slate-500 uppercase font-black mb-1">Rare Emojis</div>
+                        <div id="buy-emojis" class="text-xl font-mono text-indigo-300">0</div>
+                    </div>
+                    <div class="bg-slate-950/50 p-4 rounded-2xl border border-white/5">
+                        <div class="text-[8px] text-slate-500 uppercase font-black mb-1">Nitro Months</div>
+                        <div id="buy-nitro" class="text-xl font-mono text-indigo-300">0</div>
+                    </div>
+                </div>
+
+                <div class="mt-auto space-y-3">
+                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-black tracking-widest">
+                        <span id="progress-label">Market Saturation</span>
+                        <span id="progress-pct">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden p-0.5 border border-white/5">
+                        <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                    </div>
+                </div>
             </div>
         </div>
-    </main>
 
-    <footer>
-        <p>&copy; 2026 EverythingTT. Built for the Community.</p>
-    </footer>
+        <!-- Footer & Security Disclaimer -->
+        <footer class="mt-20 pt-10 border-t border-white/5 text-center space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left max-w-4xl mx-auto">
+                <div class="space-y-3">
+                    <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Security First</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">This tool uses direct browser-to-API communication. Your password is transmitted via HTTPS directly to <code>territorial.io</code> and is never cached or intercepted.</p>
+                </div>
+                <div class="space-y-3">
+                    <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Open Source</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Community-driven development. Verify the source code directly in your browser. No obfuscation, no hidden scripts.</p>
+                </div>
+                <div class="space-y-3">
+                    <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Legal</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Not affiliated with official Territorial.io. Created for educational and community analysis purposes only.</p>
+                </div>
+            </div>
+            <p class="text-[9px] text-slate-600 font-bold uppercase tracking-[0.2em] pt-8">© 2026 Territorial Appraiser Community • Version 2.1.0</p>
+        </footer>
+    </div>
 
-    <script type="module" src="js/main.js"></script>
+    <!-- UI MODALS -->
+    <div id="debugOverlay" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/90 modal-overlay hidden-modal">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-[2.5rem] shadow-2xl modal-content p-8 flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-white">API Response</h3>
+                    <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Live Data Feed</p>
+                </div>
+                <button onclick="UI.hideDebug()" class="p-2 hover:bg-white/5 rounded-full transition-colors text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-auto bg-slate-950 rounded-2xl border border-white/5 p-6 font-mono text-[11px] leading-relaxed">
+                <pre id="json-viewer" class="whitespace-pre-wrap text-slate-300"></pre>
+            </div>
+            <div class="mt-6">
+                <button onclick="UI.hideDebug()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-95">Return to App</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-8 py-3 rounded-2xl opacity-0 pointer-events-none transition-all duration-300 shadow-2xl z-[120] text-sm font-bold border border-white/10 uppercase tracking-widest">
+        Analysis Done!
+    </div>
+
+    <!-- SHARE MODAL -->
+    <div id="shareOverlay" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/90 modal-overlay hidden-modal">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-[2.5rem] shadow-2xl modal-content p-8 flex flex-col">
+            <div class="text-center space-y-4">
+                <div class="h-16 w-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto">
+                    <svg class="text-emerald-500" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11"></polyline></svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Report Published!</h3>
+                <p class="text-xs text-slate-400">Your real-time appraisal report is now live on PageDrop. Share the link below:</p>
+                
+                <div class="relative mt-6">
+                    <input type="text" id="share-url" readonly class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-4 px-5 text-sm font-mono text-indigo-300 outline-none">
+                    <button id="copy-share-btn" class="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-600 hover:bg-indigo-500 p-2 rounded-xl transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                </div>
+
+                <div class="pt-6">
+                    <button onclick="document.getElementById('shareOverlay').classList.add('hidden-modal')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl transition-all">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * PAGEDROP INTEGRATION
+         */
+        async function publishToPageDrop() {
+            const btn = document.getElementById('publish-btn');
+            const originalContent = btn.innerHTML;
+            
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="animate-pulse">PUBLISHING...</span>';
+                
+                // 1. Get current page HTML
+                // We clone the document to strip sensitive/unnecessary parts before upload
+                const clone = document.documentElement.cloneNode(true);
+                
+                // Security: Strip credentials from the uploaded version
+                const userField = clone.querySelector('#api-username');
+                const passField = clone.querySelector('#api-password');
+                if (userField) userField.value = '';
+                if (passField) passField.value = '';
+                
+                // Strip the "Import JSON" and "Consent" UI for the published report
+                const accountAccess = clone.querySelector('.p-4.bg-slate-800\\/40');
+                if (accountAccess) accountAccess.remove();
+                
+                const htmlContent = '<!DOCTYPE html>\n' + clone.outerHTML;
+
+                // 2. Call PageDrop Public API
+                const response = await fetch('https://pagedrop.io/api/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        html: htmlContent,
+                        ttl: '3d',
+                        visibility: 'private',
+                        fileName: 'territorial-appraisal.html'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error || 'Upload failed');
+                }
+
+                // 3. Show Success Modal
+                document.getElementById('share-url').value = result.data.url;
+                document.getElementById('shareOverlay').classList.remove('hidden-modal');
+                UI.showToast("REPORT PUBLISHED");
+
+            } catch (err) {
+                console.error("PageDrop Error:", err);
+                UI.showToast("PUBLISH FAILED: API BLOCKED");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }
+
+        document.getElementById('publish-btn').addEventListener('click', publishToPageDrop);
+        
+        document.getElementById('copy-share-btn').addEventListener('click', () => {
+            const urlField = document.getElementById('share-url');
+            urlField.select();
+            document.execCommand('copy');
+            UI.showToast("URL COPIED");
+        });
+
+        /**
+         * DATA COLLECTION & PERSISTENCE
+         */
+        function saveToLocalStorage(username, password) {
+            const data = { username, password, timestamp: new Date().toISOString() };
+            localStorage.setItem('territorial_creds', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('territorial_creds');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.username) document.getElementById('api-username').value = data.username;
+                    if (data.password) document.getElementById('api-password').value = data.password;
+                    document.getElementById('consent-save').checked = true;
+                    return true;
+                } catch (e) {
+                    localStorage.removeItem('territorial_creds');
+                }
+            }
+            return false;
+        }
+
+        function downloadCredentials(username, password) {
+            const data = { username, password, timestamp: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'territorial_credentials.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        document.getElementById('import-config').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.username) document.getElementById('api-username').value = data.username;
+                    if (data.password) document.getElementById('api-password').value = data.password;
+                    UI.showToast("CREDENTIALS IMPORTED");
+                } catch (err) {
+                    UI.showToast("INVALID JSON FILE");
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        /**
+         * GLOBAL STATE & CONFIGURATION
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            if (loadFromLocalStorage()) {
+                UI.showToast("WELCOME BACK: CREDENTIALS LOADED");
+            }
+        });
+
+        let lastApiResponse = null;
+
+        /**
+         * UI CONTROLLER
+         * Manages modals, toasts, and JSON formatting
+         */
+        const UI = {
+            debugOverlay: document.getElementById('debugOverlay'),
+            jsonViewer: document.getElementById('json-viewer'),
+            
+            /**
+             * Formats and displays raw API response in a modal
+             * @param {Object} data - The raw JSON from Territorial.io API
+             */
+            showDebug(data) {
+                const formatted = JSON.stringify(data, null, 4);
+                this.jsonViewer.innerHTML = formatted
+                    .replace(/"(.*?)"(?=:)/g, '<span class="json-key">"$1"</span>')
+                    .replace(/:\s*(\d+)/g, ': <span class="json-num">$1</span>')
+                    .replace(/:\s*"(.*?)"/g, ': <span class="json-str">"$1"</span>');
+                this.debugOverlay.classList.remove('hidden-modal');
+            },
+
+            hideDebug() { this.debugOverlay.classList.add('hidden-modal'); },
+
+            /**
+             * Shows a floating notification at the bottom
+             * @param {string} msg - Message to display
+             */
+            showToast(msg) {
+                const toast = document.getElementById('toast');
+                toast.innerText = msg;
+                toast.style.opacity = '1';
+                toast.style.transform = 'translate(-50%, -10px)';
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translate(-50%, 0px)';
+                }, 2000);
+            }
+        };
+
+        /**
+         * VALUATION CONSTANTS (Current Market Rates)
+         */
+        const GOLD_PER_USD = 1000 / 1.99; // Base: 1000 Gold = $1.99 USD
+        const ETT_PER_USD = 4100 / 5.99; // Base: 4100 ETT = $5.99 USD
+        const COSTS = { 
+            LOGO: 2500,  // Gold cost for a clan logo
+            ROLE: 15500, // Gold cost for a custom role
+            EMOJI: 4500, // Gold cost for a rare emoji
+            NITRO: 8500  // Comparative gold value for Nitro
+        };
+
+        /**
+         * Formats large numbers into readable strings (e.g., 1.5M, 10K)
+         */
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+            return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        }
+
+        /**
+         * LINGUISTIC ANALYSIS
+         * Estimates value based on username rarity (Short names, OG keywords, etc.)
+         */
+        function calculateNamePrestige(username) {
+            if (!username) return { total: 0, badges: [] };
+            
+            // Extract core name (strip clan tags)
+            const coreName = username.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '');
+            let bonus = 0;
+            let badges = [];
+            const lowerName = coreName.toLowerCase();
+
+            // Rarity Factor: Length (Shorter = Scarcer)
+            if (coreName.length <= 3) {
+                bonus += 75.00;
+                badges.push({ text: "LEGENDARY SHORT", class: "bg-amber-500/20 text-amber-300" });
+            } else if (coreName.length <= 5) {
+                bonus += 15.00;
+                badges.push({ text: "PREMIUM SHORT", class: "bg-slate-500/20 text-slate-300" });
+            }
+
+            // Rarity Factor: Character Set (Clean Alphanumeric)
+            const isAlpha = /^[a-zA-Z]+$/.test(coreName);
+            if (isAlpha) {
+                bonus += 15.00;
+                badges.push({ text: "CLEAN ALPHA", class: "bg-emerald-500/20 text-emerald-300" });
+            }
+
+            // Rarity Factor: Dictionary OG Words
+            const dictionary = ["money", "god", "king", "lord", "ace", "rich", "zero", "boss", "yegod", "og", "pro", "elite"];
+            if (dictionary.includes(lowerName)) {
+                bonus += 45.00;
+                badges.push({ text: "DICTIONARY OG", class: "bg-indigo-500/20 text-indigo-300" });
+            }
+
+            return { total: bonus, badges };
+        }
+
+        /**
+         * SCALING VALUE CALCULATOR
+         * Maps a rank (1-500) to a dollar value range
+         */
+        function calculateRankWorth(rank, minVal, maxVal) {
+            if (!rank || rank > 500) return minVal;
+            if (rank <= 0) return 0;
+            const t = (500 - rank) / (500 - 1); 
+            return minVal + (t * (maxVal - minVal));
+        }
+
+        /**
+         * MAIN UI UPDATE ENGINE
+         * Updates all currency fields and affordability metrics
+         */
+        function updateUI(gold, usd) {
+            document.getElementById('usd-formatted').innerText = formatNumber(usd);
+            document.getElementById('ett-formatted').innerText = formatNumber(usd * ETT_PER_USD);
+            document.getElementById('gold-formatted').innerText = formatNumber(gold);
+
+            // Asset Affordability Calculations
+            document.getElementById('buy-logos').innerText = formatNumber(Math.floor(gold / COSTS.LOGO));
+            document.getElementById('buy-roles').innerText = formatNumber(Math.floor(gold / COSTS.ROLE));
+            document.getElementById('buy-emojis').innerText = formatNumber(Math.floor(gold / COSTS.EMOJI));
+            document.getElementById('buy-nitro').innerText = formatNumber(Math.floor(gold / COSTS.NITRO));
+
+            // Market Saturation Progress
+            const pct = Math.min(100, (usd / 250) * 100);
+            document.getElementById('progress-bar').style.width = pct + '%';
+            document.getElementById('progress-pct').innerText = Math.floor(pct) + '%';
+
+            // Wealth Tier Updates
+            const tierName = document.getElementById('tier-name');
+            const tierDesc = document.getElementById('tier-desc');
+            if (usd >= 500) {
+                tierName.innerText = "Whale / Collector";
+                tierDesc.innerText = "Capable of swaying market forces with a single move.";
+            } else if (usd >= 100) {
+                tierName.innerText = "Elite Territory";
+                tierDesc.innerText = "A well-established account with significant trade power.";
+            } else if (usd >= 20) {
+                tierName.innerText = "Active Player";
+                tierDesc.innerText = "Healthy reserves. Climbing the global leaderboards.";
+            } else {
+                tierName.innerText = "Scout Tier";
+                tierDesc.innerText = "The journey is just beginning. Accumulate more gold.";
+            }
+        }
+
+        /**
+         * EVENT LISTENERS: CURRENCY CONVERTERS
+         * Live calculation between USD, GOLD, and ETT
+         */
+        document.getElementById('usd').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) || 0;
+            document.getElementById('gold').value = Math.floor(val * GOLD_PER_USD);
+            document.getElementById('ett').value = Math.floor(val * ETT_PER_USD);
+            updateUI(val * GOLD_PER_USD, val);
+        });
+
+        document.getElementById('gold').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) || 0;
+            const usd = val / GOLD_PER_USD;
+            document.getElementById('usd').value = usd.toFixed(2);
+            document.getElementById('ett').value = Math.floor(usd * ETT_PER_USD);
+            updateUI(val, usd);
+        });
+
+        document.getElementById('ett').addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) || 0;
+            const usd = val / ETT_PER_USD;
+            document.getElementById('usd').value = usd.toFixed(2);
+            document.getElementById('gold').value = Math.floor(usd * GOLD_PER_USD);
+            updateUI(usd * GOLD_PER_USD, usd);
+        });
+
+        /**
+         * API INTEGRATION FLOW
+         * Fetches real-time data from Territorial.io backend
+         * Security: Password is sent directly to API via POST request
+         */
+        document.getElementById('fetch-btn').addEventListener('click', async () => {
+            const myAcc = document.getElementById('api-username').value.trim();
+            const myPass = document.getElementById('api-password').value.trim();
+            const target = document.getElementById('target-username').value.trim();
+            
+            if (!myAcc || !myPass || !target) {
+                return UI.showToast("CREDENTIALS REQUIRED");
+            }
+
+            const btn = document.getElementById('fetch-btn');
+            const btnText = document.getElementById('btn-text');
+            const statusDot = document.getElementById('status-dot');
+            
+            // Visual feedback for loading state
+            btn.disabled = true;
+            btn.classList.add('loading-shimmer');
+            btnText.innerText = "CONNECTING...";
+            statusDot.className = "h-2 w-2 rounded-full bg-amber-500 animate-pulse";
+
+            try {
+                // Official Territorial.io API Endpoint
+                const response = await fetch("https://territorial.io/api/account/get", {
+                    "method": "POST",
+                    "headers": { "Content-Type": "application/json" },
+                    "body": JSON.stringify({
+                        "account_name": myAcc,
+                        "password": myPass,
+                        "target_account_name": target
+                    })
+                });
+
+                const data = await response.json();
+                lastApiResponse = data;
+
+                if (data.status !== "ok") {
+                    throw new Error(data.message || "API Rejected Request");
+                }
+
+                // If user consented, save to localStorage and download JSON
+                if (document.getElementById('consent-save').checked) {
+                    saveToLocalStorage(myAcc, myPass);
+                    downloadCredentials(myAcc, myPass);
+                } else {
+                    localStorage.removeItem('territorial_creds');
+                }
+
+                const acc = data.account_data;
+
+                /**
+                 * VALUATION ALGORITHM
+                 */
+                
+                // 1. Gold Reserve ($1.99 per 1000 Gold)
+                const realGold = (acc.gold_cents / 100);
+                const goldInUSD = realGold / GOLD_PER_USD;
+                
+                // 2. Clan Member Rank A ($1.21 - $17.99)
+                const clanRankVal = calculateRankWorth(acc.clan_member_rank_a, 1.21, 17.99);
+                
+                // 3. Gold Rank ($0.23 - $39.99)
+                const goldRankVal = calculateRankWorth(acc.gold_rank, 0.23, 39.99);
+                
+                // 4. Clan Leader Points ($121.89 per 121,891 pts)
+                const leaderPointsVal = (acc.clan_leader_points || 0) * (121.89 / 121891);
+                
+                // 5. Name Factor (Rarity analysis)
+                const namePrestige = calculateNamePrestige(acc.username);
+
+                // Final Combined Worth
+                const totalVal = goldInUSD + clanRankVal + goldRankVal + leaderPointsVal + namePrestige.total;
+
+                // Update UI Display
+                document.getElementById('appraisal-result').classList.remove('hidden');
+                document.getElementById('res-user').innerText = acc.username;
+                document.getElementById('res-gold').innerText = formatNumber(realGold);
+                document.getElementById('res-clan-rank').innerText = `#${acc.clan_member_rank_a || '---'}`;
+                document.getElementById('res-leader-pts').innerText = formatNumber(acc.clan_leader_points || 0);
+                document.getElementById('res-gold-rank-val').innerText = `#${acc.gold_rank || '---'}`;
+                document.getElementById('res-admin-rank').innerText = `#${acc.admin_rank || '---'}`;
+                document.getElementById('res-name-bonus').innerText = `+$${namePrestige.total.toFixed(2)}`;
+                document.getElementById('res-val').innerText = `$${totalVal.toFixed(2)}`;
+
+                // Generate Name Rarity Badges
+                const tags = document.getElementById('res-name-tags');
+                tags.innerHTML = '';
+                namePrestige.badges.forEach(b => {
+                    const span = document.createElement('span');
+                    span.className = `px-2 py-0.5 rounded text-[7px] font-black uppercase ${b.class}`;
+                    span.innerText = b.text;
+                    tags.appendChild(span);
+                });
+
+                // Sync the main converter with new appraisal
+                document.getElementById('usd').value = totalVal.toFixed(2);
+                document.getElementById('usd').dispatchEvent(new Event('input'));
+
+                statusDot.className = "h-2 w-2 rounded-full bg-emerald-500";
+                UI.showToast("SCAN SUCCESS");
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                statusDot.className = "h-2 w-2 rounded-full bg-rose-500";
+                UI.showToast("API ERROR: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading-shimmer');
+                btnText.innerText = "FETCH API DATA";
+            }
+        });
+
+        /**
+         * DEBUG VIEW TOGGLE
+         */
+        document.getElementById('debug-btn').addEventListener('click', () => {
+            if (lastApiResponse) UI.showDebug(lastApiResponse);
+            else UI.showToast("NO DATA LOADED");
+        });
+    </script>
 </body>
 </html>
