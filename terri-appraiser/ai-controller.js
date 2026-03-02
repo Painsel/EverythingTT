@@ -6,8 +6,8 @@
  */
 
 const AI_CONFIG = {
-    // Using the new, supported Hugging Face router endpoint
-    model: "mistralai/Mistral-7B-Instruct-v0.3", 
+    // Using Llama 3.2 3B - Very stable and lightweight for chat completions
+    model: "meta-llama/Llama-3.2-3B-Instruct", 
     endpoint: "https://router.huggingface.co/v1/chat/completions",
     // Dynamic Token Management via JSONBin (prevents hardcoded secrets)
     keySource: "https://api.jsonbin.io/v3/b/69a6011aae596e708f58e218",
@@ -123,8 +123,7 @@ const AI = {
                 body: JSON.stringify({
                     model: AI_CONFIG.model,
                     messages: [
-                        { role: "system", content: APPRAISER_SYSTEM_PROMPT },
-                        { role: "user", content: context + text }
+                        { role: "user", content: APPRAISER_SYSTEM_PROMPT + "\n\n" + context + text }
                     ],
                     max_tokens: 300,
                     temperature: 0.7
@@ -141,20 +140,22 @@ const AI = {
                         'Authorization': `Bearer ${AI_CONFIG.token}`
                     },
                     body: JSON.stringify({
-                        model: AI_CONFIG.model,
-                        messages: [
-                            { role: "system", content: APPRAISER_SYSTEM_PROMPT },
-                            { role: "user", content: context + text }
-                        ],
-                        max_tokens: 300,
-                        temperature: 0.7
-                    })
+                            model: AI_CONFIG.model,
+                            messages: [
+                                { role: "user", content: APPRAISER_SYSTEM_PROMPT + "\n\n" + context + text }
+                            ],
+                            max_tokens: 300,
+                            temperature: 0.7
+                        })
                 });
             }
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP ${response.status}`);
+                const errorMsg = typeof errorData.error === 'object' 
+                    ? (errorData.error.message || JSON.stringify(errorData.error)) 
+                    : (errorData.error || `HTTP ${response.status}`);
+                throw new Error(errorMsg);
             }
 
             const data = await response.json();
