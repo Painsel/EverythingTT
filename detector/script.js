@@ -681,36 +681,98 @@ function openRemoteTarget() {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>External Site - Security Target</title>
+            <title>EverythingTT External Site - Research Target</title>
             <style>
-                body { font-family: sans-serif; padding: 50px; text-align: center; background: #f8fafc; color: #1e293b; }
-                .box { border: 2px dashed #cbd5e1; padding: 40px; border-radius: 20px; max-width: 600px; margin: 0 auto; }
-                h1 { color: #3b82f6; }
-                #status { margin-top: 20px; font-size: 1.2rem; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+                :root { --primary: #3b82f6; --bg: #f8fafc; --text: #1e293b; --danger: #ef4444; }
+                body { font-family: 'Inter', -apple-system, sans-serif; padding: 0; margin: 0; background: var(--bg); color: var(--text); }
+                .navbar { background: white; padding: 1rem 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+                .logo { font-weight: 800; color: var(--primary); font-size: 1.25rem; }
+                .container { max-width: 800px; margin: 3rem auto; padding: 0 1rem; text-align: center; }
+                .hero { background: white; padding: 3rem; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+                h1 { margin-bottom: 1rem; font-size: 2rem; }
+                #status-card { margin-top: 2rem; padding: 1.5rem; border-radius: 12px; background: #f1f5f9; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+                .pulse { width: 12px; height: 12px; background: #94a3b8; border-radius: 50%; display: inline-block; margin-right: 8px; }
+                .pulse.active { background: var(--danger); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2); animation: pulse 2s infinite; }
+                @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.5; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.5; } }
+                .interaction-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+                .stat-box { background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0; }
+                .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
+                .stat-value { font-size: 1.25rem; font-weight: 700; margin-top: 0.25rem; }
             </style>
         </head>
         <body>
-            <div class="box">
-                <h1>External Website Context</h1>
-                <p>This is a simulated external website that includes the <b>Security Monitoring Agent</b>.</p>
-                <div id="status">Waiting for remote security broadcast...</div>
+            <nav class="navbar"><div class="logo">ExternalSite.com</div><div id="connection-status" style="font-size:0.8rem; opacity:0.6;">Connected to Research Hub</div></nav>
+            <div class="container">
+                <div class="hero">
+                    <h1>Welcome to the Target Site</h1>
+                    <p>This page is being monitored by the <b>EverythingTT Security Research Center</b>.</p>
+                    
+                    <div id="status-card">
+                        <div style="display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">
+                            <span id="status-pulse" class="pulse"></span>
+                            <span id="status-text" style="font-weight:600; text-transform:uppercase; letter-spacing:1px;">Idle</span>
+                        </div>
+                        <div id="status-msg" style="font-size:0.9rem; opacity:0.7;">Waiting for security broadcast...</div>
+                        
+                        <div class="interaction-stats">
+                            <div class="stat-box"><div class="stat-label">Clicks</div><div id="click-count" class="stat-value">0</div></div>
+                            <div class="stat-box"><div class="stat-label">Focus</div><div id="focus-status" class="stat-value" style="color:#10b981;">Active</div></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <script>
+                const sid = Math.random().toString(36).substr(2, 9);
+                const host = "Remote-Target-Simulation";
+                let clicks = 0;
+
+                const report = (event = 'heartbeat') => {
+                    fetch(\`http://localhost:8001/report?sid=\${sid}&host=\${host} (\${event})\`).catch(()=>{});
+                };
+
+                window.addEventListener('click', () => {
+                    clicks++;
+                    document.getElementById('click-count').textContent = clicks;
+                    report('click');
+                });
+
+                window.addEventListener('focus', () => {
+                    document.getElementById('focus-status').textContent = 'Active';
+                    document.getElementById('focus-status').style.color = '#10b981';
+                    report('focus');
+                });
+
+                window.addEventListener('blur', () => {
+                    document.getElementById('focus-status').textContent = 'Hidden';
+                    document.getElementById('focus-status').style.color = '#ef4444';
+                    report('blur');
+                });
+
                 window.addEventListener('message', (event) => {
                     if (event.data && event.data.type === 'SECURITY_MONITOR') {
-                        document.getElementById('status').innerHTML = '<b style="color:#ef4444; font-size:1.5rem;">🚨 MONITORING DETECTED!</b><br><br>' + event.data.message;
+                        document.getElementById('status-pulse').classList.add('active');
+                        document.getElementById('status-text').textContent = 'Monitored';
+                        document.getElementById('status-text').style.color = '#ef4444';
+                        document.getElementById('status-msg').textContent = event.data.message;
+                        document.getElementById('status-card').style.borderColor = '#fecaca';
+                        document.getElementById('status-card').style.background = '#fff1f2';
+                        
                         const overlay = document.createElement('div');
                         overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:#ef4444;color:white;text-align:center;padding:15px;font-weight:bold;z-index:9999;box-shadow:0 4px 10px rgba(0,0,0,0.3);font-family:sans-serif;text-transform:uppercase;';
-                        overlay.innerHTML = '⚠️ REMOTE SECURITY ALERT: ' + event.data.message;
+                        overlay.innerHTML = '⚠️ EVERYTHINGTT SECURITY ALERT: ' + event.data.message;
                         document.body.prepend(overlay);
+                        report('alert_received');
                     }
                 });
+
+                setInterval(report, 10000);
+                report('connected');
             </script>
         </body>
         </html>
     `)}`;
-    remoteTargetWindow = window.open(remoteUrl, '_blank', 'width=800,height=600');
-    logActivity('Opened external target window for cross-site monitoring', 'system');
+    remoteTargetWindow = window.open(remoteUrl, '_blank', 'width=800,height=700');
+    logActivity('Opened EverythingTT enhanced external target window', 'system');
 }
 
 // Function to simulate a cross-site injection (for demonstration)
