@@ -251,7 +251,6 @@ async function monitorMedia() {
     if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
         // We can't actually detect if they ARE recording without asking, 
         // but we can detect if the API is available and if they start it.
-        // For security testing, we can monitor visibilitychange which triggers on some recording overlays.
     }
 
     // Monitor Visibility API for potential overlays
@@ -264,11 +263,96 @@ async function monitorMedia() {
     });
 }
 
+// 9. DOM Injection Detection (MutationObserver)
+function monitorDOMInjections() {
+    const statusDOM = document.getElementById('status-dom');
+    
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach((node) => {
+                    // Check if node is an element and not one we expected
+                    if (node.nodeType === 1) {
+                        const tag = node.tagName.toLowerCase();
+                        // Many extensions inject <div>, <script>, or <link>
+                        if (tag === 'script' || tag === 'iframe' || tag === 'object' || tag === 'embed') {
+                            statusDOM.textContent = 'INJECTION DETECTED';
+                            statusDOM.className = 'status negative';
+                            logActivity(`Suspicious element injected: <${tag}>`, 'alert');
+                        } else {
+                            // General DOM changes
+                            statusDOM.textContent = 'DOM MODIFIED';
+                            statusDOM.className = 'status neutral';
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+}
+
+// 10. Userscript / Extension Heuristics
+function detectUserscripts() {
+    const statusUserscript = document.getElementById('status-userscript');
+    let detected = false;
+    let reasons = [];
+
+    // Heuristic 1: Common global variables injected by managers
+    const potentialManagers = ['GM_info', 'GM_getValue', 'GM', 'Tampermonkey'];
+    potentialManagers.forEach(manager => {
+        if (typeof window[manager] !== 'undefined') {
+            detected = true;
+            reasons.push(`Global ${manager} detected`);
+        }
+    });
+
+    // Heuristic 2: Check for specific DOM signatures of popular extensions
+    const signatures = [
+        'tampermonkey', 'greasemonkey', 'violentmonkey', 'adblock', 'ublock'
+    ];
+    
+    const allElements = document.getElementsByTagName('*');
+    for (let i = 0; i < allElements.length; i++) {
+        const el = allElements[i];
+        const attrStr = (el.id + el.className + el.getAttribute('name')).toLowerCase();
+        
+        signatures.forEach(sig => {
+            if (attrStr.includes(sig)) {
+                detected = true;
+                reasons.push(`DOM signature: ${sig}`);
+            }
+        });
+        if (detected) break;
+    }
+
+    // Heuristic 3: Check for unusual script tags (e.g., from blobs or with unusual properties)
+    const scripts = document.getElementsByTagName('script');
+    for (let script of scripts) {
+        if (script.src.startsWith('blob:') || script.src.startsWith('data:')) {
+            detected = true;
+            reasons.push('Unusual script source (blob/data)');
+        }
+    }
+
+    if (detected) {
+        statusUserscript.textContent = 'DETECTED';
+        statusUserscript.className = 'status negative';
+        logActivity(`Userscript/Extension heuristic triggered: ${reasons.join(', ')}`, 'alert');
+    }
+}
+
 // Initial Checks
 window.onload = () => {
     logActivity('Security Dashboard Started', 'system');
     detectIncognito();
     monitorMedia();
+    monitorDOMInjections();
+    detectUserscripts();
 
     // DevTools check is tricky, run it periodically and on resize
     setInterval(detectDevTools, 2000);
