@@ -983,11 +983,29 @@ function initializeAgentLinks() {
     const agentCodeRaw = `(function(){
         const sid = Math.random().toString(36).substr(2, 9);
         const host = window.location.hostname || 'local-file';
-        const report = (type, data = {}) => fetch(\`http://localhost:8001/report?sid=\${sid}&host=\${host}&event=\${type}\`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).catch(()=>{});
+        
+        // Enhanced Reporting (Bypasses website CSP if running as UserScript)
+        const report = (type, data = {}) => {
+            const url = \`http://localhost:8001/report?sid=\${sid}&host=\${host}&event=\${type}\`;
+            const body = JSON.stringify(data);
+            
+            // Check for GM_xmlhttpRequest (UserScript mode)
+            if (typeof GM_xmlhttpRequest !== 'undefined') {
+                GM_xmlhttpRequest({
+                    method: 'POST',
+                    url: url,
+                    headers: { 'Content-Type': 'application/json' },
+                    data: body
+                });
+            } else {
+                // Fallback to fetch (Bookmarklet mode)
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: body
+                }).catch(()=>{});
+            }
+        };
         
         const i = 'monitoring-overlay-auto';
         if(document.getElementById(i)) return;
@@ -995,8 +1013,14 @@ function initializeAgentLinks() {
         const o = document.createElement('div');
         o.id = i;
         o.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:#ef4444;color:white;text-align:center;padding:10px;font-weight:bold;z-index:999999;box-shadow:0 2px 10px rgba(0,0,0,0.3);font-family:sans-serif;text-transform:uppercase;';
-        o.innerHTML = '⚠️ EVERYTHINGTT SECURITY SYSTEM: THIS SITE IS BEING MONITORED BY THE CENTRAL RESEARCH CENTER <span style="margin-left:20px; cursor:pointer; text-decoration:underline;" onclick="this.parentElement.remove()">Dismiss</span>';
+        o.innerHTML = '⚠️ EVERYTHINGTT SECURITY SYSTEM: THIS SITE IS BEING MONITORED BY THE CENTRAL RESEARCH CENTER <span id="ett-dismiss" style="margin-left:20px; cursor:pointer; text-decoration:underline;">Dismiss</span>';
         document.body.prepend(o);
+
+        // Avoid inline handlers to comply with strict CSP (like ChatGPT)
+        const dismissBtn = document.getElementById('ett-dismiss');
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', () => o.remove());
+        }
         
         // AI Platform Advanced Monitoring
         const aiHosts = ['chatgpt.com', 'openai.com', 'claude.ai', 'gemini.google.com', 'bing.com', 'perplexity.ai', 'poe.com', 'mistral.ai'];
@@ -1099,8 +1123,8 @@ function initializeAgentLinks() {
         bookmarkletLink.href = `javascript:${agentCodeMinified}`;
     }
 
-    // Store for modal view
-    generatedUserScript = `// ==UserScript==\n// @name EverythingTT Security Agent\n// @match *://*/*\n// @grant none\n// ==/UserScript==\n\n${agentCodeRaw.replace('void(0);', '')}`;
+    // Store for modal view with proper UserScript metadata for CSP bypass
+    generatedUserScript = `// ==UserScript==\n// @name EverythingTT Security Agent\n// @match *://*/*\n// @grant GM_xmlhttpRequest\n// @connect localhost\n// ==/UserScript==\n\n${agentCodeRaw.replace('void(0);', '')}`;
 }
 
 function openScriptModal() {
