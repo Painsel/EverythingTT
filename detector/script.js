@@ -798,6 +798,27 @@ function initializeAgentLinks() {
 
     const userscriptPre = document.getElementById('userscript-code');
     if (userscriptPre) {
-        userscriptPre.textContent = `// ==UserScript==\n// @name Security Monitoring Agent\n// @match *://*/*\n// @grant none\n// ==/UserScript==\n\n${agentCode.replace('void(0);', '')}`;
+        userscriptPre.textContent = `// ==UserScript==\n// @name EverythingTT Security Agent\n// @match *://*/*\n// @grant none\n// ==/UserScript==\n\n${agentCode.replace('void(0);', '')}`;
+    }
+}
+
+function copyUserScript() {
+    const pre = document.getElementById('userscript-code');
+    if (pre) {
+        navigator.clipboard.writeText(pre.textContent);
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = originalText, 2000);
+    }
+}
+
+function copyLaunchCommand() {
+    const cmd = 'python detector.py';
+    navigator.clipboard.writeText(cmd);
+    const hint = document.getElementById('launch-hint');
+    if (hint) {
+        hint.style.display = 'block';
+        setTimeout(() => hint.style.display = 'none', 3000);
     }
 }
