@@ -10,68 +10,118 @@ function logActivity(message, type = 'info') {
     console.log(`[${time}] ${message}`);
 }
 
-// 1. DevTools Detection (Common technique: debugger/timing)
+// 1. Improved DevTools Detection
+let devtoolsOpen = false;
+
 function detectDevTools() {
     const statusDevTools = document.getElementById('status-devtools');
-    const cardDevTools = document.getElementById('card-devtools');
+    let detectedThisRound = false;
 
-    let devtoolsOpen = false;
-
-    // Method 1: Debugger timing
+    // Method 1: Timing check (debugger)
     const startTime = performance.now();
     debugger;
-    const endTime = performance.now();
-
-    if (endTime - startTime > 100) { // If debugger pauses execution, timing will be long
-        devtoolsOpen = true;
+    if (performance.now() - startTime > 100) {
+        detectedThisRound = true;
     }
 
-    // Method 2: Element id with getter (works in some browsers)
+    // Method 2: Resize check (only if not full screen)
+    const threshold = 160;
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+
+    if (widthDiff > threshold || heightDiff > threshold) {
+        // This is a strong hint if the user isn't just using a very large window border
+        detectedThisRound = true;
+    }
+
+    // Method 3: Console formatters (Modern Chrome/Firefox)
     const devtools = /./;
     devtools.toString = function() {
-        devtoolsOpen = true;
+        detectedThisRound = true;
         return 'devtools';
     }
     console.log(devtools);
 
-    if (devtoolsOpen) {
-        statusDevTools.textContent = 'DETECTED';
-        statusDevTools.className = 'status negative';
-        logActivity('Developer Tools detected!', 'alert');
+    // Method 4: Getter on object logged to console
+    const element = new Image();
+    Object.defineProperty(element, 'id', {
+        get: function() {
+            detectedThisRound = true;
+            return 'devtools-detector';
+        }
+    });
+    console.log(element);
+
+    if (detectedThisRound) {
+        if (!devtoolsOpen) {
+            devtoolsOpen = true;
+            statusDevTools.textContent = 'DETECTED';
+            statusDevTools.className = 'status negative';
+            logActivity('Developer Tools detected!', 'alert');
+        }
     } else {
-        statusDevTools.textContent = 'Not detected';
-        statusDevTools.className = 'status positive';
+        if (devtoolsOpen) {
+            devtoolsOpen = false;
+            statusDevTools.textContent = 'Not detected';
+            statusDevTools.className = 'status positive';
+            logActivity('Developer Tools closed', 'info');
+        }
     }
 }
 
-// 2. Incognito/Private Mode Detection
+// 2. Improved Incognito/Private Mode Detection
 async function detectIncognito() {
     const statusIncognito = document.getElementById('status-incognito');
     let isIncognito = false;
 
-    // Chrome/Blink based detection (using storage estimate)
+    // A. Chrome & Chromium-based (Edge, Brave, etc.)
     if ('storage' in navigator && 'estimate' in navigator.storage) {
         const { quota } = await navigator.storage.estimate();
-        // Chrome incognito quota is usually much smaller (e.g., < 100MB or based on RAM)
-        // This is not 100% reliable but a common heuristic
-        if (quota < 120000000) { // < 120MB approx
+        // Chrome Incognito quota is usually much smaller (heuristics)
+        if (quota < 120000000) {
             isIncognito = true;
         }
     }
 
-    // Safari Private Mode detection
+    // B. FileSystem API (Legacy but still useful for some browsers)
+    if (window.webkitRequestFileSystem) {
+        window.webkitRequestFileSystem(window.TEMPORARY, 1, () => {
+            // Success in normal mode
+        }, () => {
+            isIncognito = true; // Fails in incognito
+        });
+    }
+
+    // C. IndexedDB (Firefox & Safari)
     try {
-        window.openDatabase(null, null, null, null);
+        const db = indexedDB.open("test");
+        db.onerror = () => {
+            isIncognito = true;
+            updateIncognitoStatus(isIncognito);
+        };
+        db.onsuccess = () => {
+            updateIncognitoStatus(isIncognito);
+        };
     } catch (e) {
         isIncognito = true;
+        updateIncognitoStatus(isIncognito);
     }
 
-    // Firefox Private Mode detection
-    if (navigator.serviceWorker === undefined) {
-        // Service workers are often disabled in private mode in older Firefox versions
-        // isIncognito = true;
+    // D. Safari specific (Modern)
+    if (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
+        try {
+            localStorage.setItem("test", "1");
+            localStorage.removeItem("test");
+        } catch (e) {
+            isIncognito = true;
+        }
     }
 
+    updateIncognitoStatus(isIncognito);
+}
+
+function updateIncognitoStatus(isIncognito) {
+    const statusIncognito = document.getElementById('status-incognito');
     if (isIncognito) {
         statusIncognito.textContent = 'DETECTED';
         statusIncognito.className = 'status negative';
@@ -149,7 +199,8 @@ window.onload = () => {
     logActivity('Security Dashboard Started', 'system');
     detectIncognito();
 
-    // DevTools check is tricky, run it periodically
+    // DevTools check is tricky, run it periodically and on resize
     setInterval(detectDevTools, 2000);
+    window.addEventListener('resize', detectDevTools);
     detectDevTools();
 };
