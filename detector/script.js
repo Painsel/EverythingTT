@@ -367,6 +367,76 @@ async function monitorMedia() {
     });
 }
 
+// 8.1 Voice Monitoring (Recording & Storage)
+let mediaRecorder;
+let audioChunks = [];
+let isRecordingVoice = false;
+
+async function toggleVoiceRecording() {
+    const btn = document.getElementById('btn-record-voice');
+    const statusVoice = document.getElementById('status-voice');
+    const metadata = document.getElementById('voice-metadata');
+
+    if (!isRecordingVoice) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    const base64Audio = reader.result;
+                    try {
+                        localStorage.setItem('everythingtt_last_voice', base64Audio);
+                        metadata.textContent = `Stored: ${Math.round(base64Audio.length / 1024)} KB (Local Storage)`;
+                        document.getElementById('btn-play-voice').style.display = 'block';
+                        logActivity('Voice message stored in local storage', 'info');
+                    } catch (e) {
+                        logActivity('Local storage full, voice message not saved', 'alert');
+                    }
+                };
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            isRecordingVoice = true;
+            btn.textContent = '⏹️ Stop Recording';
+            btn.style.background = 'var(--status-neutral)';
+            statusVoice.textContent = 'RECORDING...';
+            statusVoice.className = 'status negative';
+            logActivity('Voice recording started', 'alert');
+        } catch (err) {
+            logActivity('Microphone access denied or unavailable', 'alert');
+            alert('Error: Microphone access is required for this research module.');
+        }
+    } else {
+        mediaRecorder.stop();
+        isRecordingVoice = false;
+        btn.textContent = '🔴 Record';
+        btn.style.background = 'var(--status-negative)';
+        statusVoice.textContent = 'Captured';
+        statusVoice.className = 'status positive';
+    }
+}
+
+function playStoredVoice() {
+    const base64Audio = localStorage.getItem('everythingtt_last_voice');
+    if (base64Audio) {
+        const audio = new Audio(base64Audio);
+        audio.play();
+        logActivity('Replaying stored voice message', 'info');
+    } else {
+        alert('No voice message found in local storage.');
+    }
+}
+
 // 9. DOM Injection Detection (MutationObserver)
 function monitorDOMInjections() {
     const statusDOM = document.getElementById('status-dom');
@@ -854,6 +924,12 @@ window.onload = () => {
     setupCrossSiteMonitoring();
     initializeAgentLinks();
     setupTypingMonitor();
+    
+    // Check for existing voice message
+    if (localStorage.getItem('everythingtt_last_voice')) {
+        document.getElementById('btn-play-voice').style.display = 'block';
+        document.getElementById('voice-metadata').textContent = 'Last recording found in local storage.';
+    }
 
     // DevTools check and kill loop
     setInterval(detectDevTools, 2000);

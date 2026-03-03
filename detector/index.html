@@ -101,6 +101,23 @@
                 <p class="description">Monitors for screen capture or camera/mic permission requests.</p>
             </section>
 
+            <!-- Voice Monitor Card -->
+            <section class="card" id="card-voice">
+                <div class="card-header">
+                    <span class="icon">🎙️</span>
+                    <h3>Voice Monitor</h3>
+                </div>
+                <div class="status" id="status-voice">Ready</div>
+                <div class="description">
+                    <p style="margin-bottom:0.75rem;">Simulates unauthorized audio capture and local storage persistence.</p>
+                    <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+                        <button id="btn-record-voice" onclick="toggleVoiceRecording()" style="flex:1; padding:0.5rem; background:var(--status-negative); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem;">🔴 Record</button>
+                        <button id="btn-play-voice" onclick="playStoredVoice()" style="flex:1; padding:0.5rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem; display:none;">▶️ Replay</button>
+                    </div>
+                    <div id="voice-metadata" style="font-size:0.7rem; color:var(--secondary-color); font-style:italic;">No recording stored.</div>
+                </div>
+            </section>
+
             <!-- Typing Test Card -->
             <section class="card" id="card-typing">
                 <div class="card-header">
