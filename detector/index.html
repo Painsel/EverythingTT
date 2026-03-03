@@ -135,6 +135,20 @@
                 <div class="status" id="status-bypass">Checking...</div>
                 <p class="description">Detects automation tools (Selenium, Puppeteer) and virtualized environments (VMs).</p>
             </section>
+
+            <section class="card" id="card-desktop-scan">
+                <div class="card-header">
+                    <span class="icon">🖥️</span>
+                    <h3>Desktop Scanner</h3>
+                </div>
+                <div class="status" id="status-desktop-scan">Offline</div>
+                <div class="description">
+                    <p>Scans for automation apps (Java, Python, C#) running on your local desktop.</p>
+                    <ul class="info-list" id="desktop-scan-list">
+                        <!-- Populated by backend API -->
+                    </ul>
+                </div>
+            </section>
         </main>
 
         <section class="event-log">

@@ -554,6 +554,39 @@ function killConsole() {
     }, 1000);
 }
 
+// 13. Desktop Scanner Integration (Python Backend)
+async function checkDesktopScanner() {
+    const statusScan = document.getElementById('status-desktop-scan');
+    const scanList = document.getElementById('desktop-scan-list');
+    
+    try {
+        const response = await fetch('http://localhost:8001/scan');
+        if (response.ok) {
+            const detected = await response.json();
+            
+            if (detected.length > 0) {
+                statusScan.textContent = 'DETECTED';
+                statusScan.className = 'status negative';
+                scanList.innerHTML = '';
+                detected.forEach(proc => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${proc.name}</strong> (${proc.type})`;
+                    scanList.appendChild(li);
+                });
+                logActivity(`Desktop scanner found ${detected.length} automation processes!`, 'alert');
+            } else {
+                statusScan.textContent = 'CLEAN';
+                statusScan.className = 'status positive';
+                scanList.innerHTML = '<li>No desktop automation found</li>';
+            }
+        }
+    } catch (e) {
+        statusScan.textContent = 'OFFLINE';
+        statusScan.className = 'status neutral';
+        scanList.innerHTML = '<li>Desktop agent not running on port 8001</li>';
+    }
+}
+
 // Initial Checks
 window.onload = () => {
     logActivity('Security Dashboard Started', 'system');
@@ -563,11 +596,13 @@ window.onload = () => {
     killUserscripts();
     detectHardware();
     killConsole();
+    checkDesktopScanner();
 
     // DevTools check and kill loop
     setInterval(detectDevTools, 2000);
     setInterval(killDevTools, 1000);
     setInterval(killUserscripts, 3000); // Periodic userscript check
+    setInterval(checkDesktopScanner, 5000); // Periodic desktop scan
     window.addEventListener('resize', detectDevTools);
     detectDevTools();
 };
