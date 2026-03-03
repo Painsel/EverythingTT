@@ -48,6 +48,12 @@ Provide insights on account scans, predict market trends, and explain why certai
 Always refer to the Territorial.io Discord (https://discord.gg/DGTMnG9avc) for auction verification.
 Be professional, tracking-oriented, and helpful to the community.
 
+RESPONSE STYLE:
+- Use **bullet points** for lists and statistics.
+- Use **bold text** for important numbers, names, or terms.
+- Keep paragraphs short and readable.
+- Be structured and organized.
+
 NEW AI CAPABILITIES:
 - If a user asks to scan or appraise an account, you can automatically handle the credentials.
 - You check local storage for credentials first. 
@@ -173,10 +179,32 @@ const AI = {
         const msgDiv = document.createElement('div');
         msgDiv.className = `chat-bubble ${sender === "AI" ? "bubble-ai" : "bubble-user"}`;
         
+        // Simple Markdown-like formatting for AI
+        let formattedText = text;
         if (sender === "AI") {
-            msgDiv.innerHTML = `<span class="bubble-label label-ai">Appraiser AI</span>${text}`;
+            formattedText = text
+                // Bold: **text**
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                // Lists: lines starting with - or *
+                .split('\n').map(line => {
+                    if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+                        return `<li>${line.trim().substring(2)}</li>`;
+                    }
+                    return line ? `<p>${line}</p>` : '';
+                }).join('');
+            
+            // Wrap <li> in <ul>
+            if (formattedText.includes('<li>')) {
+                formattedText = formattedText.replace(/(<li>.*?<\/li>)+/g, '<ul>$&</ul>');
+            }
         } else {
-            msgDiv.innerHTML = `<span class="bubble-label label-user">You</span>${text}`;
+            formattedText = `<p>${text.replace(/\n/g, '<br>')}</p>`;
+        }
+        
+        if (sender === "AI") {
+            msgDiv.innerHTML = `<span class="bubble-label label-ai">Appraiser AI</span>${formattedText}`;
+        } else {
+            msgDiv.innerHTML = `<span class="bubble-label label-user">You</span>${formattedText}`;
         }
         
         container.appendChild(msgDiv);

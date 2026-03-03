@@ -548,11 +548,44 @@
         }
 
         .bubble-ai {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(99, 102, 241, 0.05));
-            color: #f8fafc;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(99, 102, 241, 0.05));
+            color: #f1f5f9;
             align-self: flex-start;
             border-bottom-left-radius: 0.25rem;
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .bubble-ai strong {
+            color: #818cf8;
+            font-weight: 700;
+        }
+
+        .bubble-ai ul, .bubble-ai ol {
+            margin: 0.5rem 0;
+            padding-left: 1.25rem;
+            list-style-type: none;
+        }
+
+        .bubble-ai li {
+            margin-bottom: 0.25rem;
+            position: relative;
+        }
+
+        .bubble-ai li::before {
+            content: "•";
+            color: #6366f1;
+            font-weight: bold;
+            position: absolute;
+            left: -1rem;
+        }
+
+        .bubble-ai p {
+            margin-bottom: 0.5rem;
+        }
+
+        .bubble-ai p:last-child {
+            margin-bottom: 0;
         }
 
         .bubble-user {
