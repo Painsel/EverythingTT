@@ -30,7 +30,14 @@
                     <h3>Incognito Mode</h3>
                 </div>
                 <div class="status" id="status-incognito">Checking...</div>
-                <p class="description">Detects if the browser is running in private or incognito mode.</p>
+                <div class="description">
+                    <p>Detects if the browser is running in private or incognito mode.</p>
+                    <ul class="info-list">
+                        <li>Browsing history not saved</li>
+                        <li>Cookies and site data not saved</li>
+                        <li>Form data not saved</li>
+                    </ul>
+                </div>
             </section>
 
             <section class="card" id="card-clicks">
@@ -67,6 +74,24 @@
                 </div>
                 <div class="status" id="status-focus">Focused</div>
                 <p class="description">Detects if the window is currently focused or hidden (blur).</p>
+            </section>
+
+            <section class="card" id="card-screen">
+                <div class="card-header">
+                    <span class="icon">📺</span>
+                    <h3>Screen Changes</h3>
+                </div>
+                <div class="status" id="status-screen">Stable</div>
+                <p class="description">Detects window resizing or full-screen mode entries.</p>
+            </section>
+
+            <section class="card" id="card-media">
+                <div class="card-header">
+                    <span class="icon">🎥</span>
+                    <h3>Media/Recording</h3>
+                </div>
+                <div class="status" id="status-media">Not active</div>
+                <p class="description">Monitors for screen capture or camera/mic permission requests.</p>
             </section>
         </main>
 

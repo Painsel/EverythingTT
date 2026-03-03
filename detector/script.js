@@ -73,6 +73,7 @@ function detectDevTools() {
 async function detectIncognito() {
     const statusIncognito = document.getElementById('status-incognito');
     let isIncognito = false;
+    let detectionReasons = [];
 
     // A. Chrome & Chromium-based (Edge, Brave, etc.)
     if ('storage' in navigator && 'estimate' in navigator.storage) {
@@ -80,6 +81,7 @@ async function detectIncognito() {
         // Chrome Incognito quota is usually much smaller (heuristics)
         if (quota < 120000000) {
             isIncognito = true;
+            detectionReasons.push('Low storage quota');
         }
     }
 
@@ -89,43 +91,61 @@ async function detectIncognito() {
             // Success in normal mode
         }, () => {
             isIncognito = true; // Fails in incognito
+            detectionReasons.push('FileSystem API disabled');
+            updateIncognitoStatus(isIncognito, detectionReasons);
         });
     }
 
     // C. IndexedDB (Firefox & Safari)
     try {
-        const db = indexedDB.open("test");
+        const db = indexedDB.open("test_incognito");
         db.onerror = () => {
             isIncognito = true;
-            updateIncognitoStatus(isIncognito);
+            detectionReasons.push('IndexedDB access denied');
+            updateIncognitoStatus(isIncognito, detectionReasons);
         };
         db.onsuccess = () => {
-            updateIncognitoStatus(isIncognito);
+            // Check if we can actually write
+            updateIncognitoStatus(isIncognito, detectionReasons);
         };
     } catch (e) {
         isIncognito = true;
-        updateIncognitoStatus(isIncognito);
+        detectionReasons.push('IndexedDB exception');
+        updateIncognitoStatus(isIncognito, detectionReasons);
     }
 
     // D. Safari specific (Modern)
     if (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
         try {
-            localStorage.setItem("test", "1");
-            localStorage.removeItem("test");
+            localStorage.setItem("test_incognito", "1");
+            localStorage.removeItem("test_incognito");
         } catch (e) {
             isIncognito = true;
+            detectionReasons.push('LocalStorage disabled (Safari)');
         }
     }
 
-    updateIncognitoStatus(isIncognito);
+    // E. Service Worker check (Firefox)
+    if ('serviceWorker' in navigator) {
+        // In some browsers/versions, Service Workers are disabled in private mode
+        try {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+        } catch (e) {
+            isIncognito = true;
+            detectionReasons.push('ServiceWorker access denied');
+        }
+    }
+
+    updateIncognitoStatus(isIncognito, detectionReasons);
 }
 
-function updateIncognitoStatus(isIncognito) {
+function updateIncognitoStatus(isIncognito, reasons = []) {
     const statusIncognito = document.getElementById('status-incognito');
     if (isIncognito) {
         statusIncognito.textContent = 'DETECTED';
         statusIncognito.className = 'status negative';
-        logActivity('Private/Incognito mode detected!', 'alert');
+        const reasonStr = reasons.length > 0 ? ` (Reason: ${reasons.join(', ')})` : '';
+        logActivity(`Private/Incognito mode detected!${reasonStr}`, 'alert');
     } else {
         statusIncognito.textContent = 'Normal Mode';
         statusIncognito.className = 'status positive';
@@ -194,10 +214,61 @@ window.addEventListener('blur', () => {
     logActivity('Window blurred / focus lost', 'alert');
 });
 
+// 7. Screen and Fullscreen Monitoring
+window.addEventListener('resize', () => {
+    const statusScreen = document.getElementById('status-screen');
+    statusScreen.textContent = 'RESIZED';
+    statusScreen.className = 'status neutral';
+    logActivity(`Window resized to ${window.innerWidth}x${window.innerHeight}`, 'info');
+    
+    // Reset status after a short delay
+    setTimeout(() => {
+        if (statusScreen.textContent === 'RESIZED') {
+            statusScreen.textContent = 'Stable';
+            statusScreen.className = 'status positive';
+        }
+    }, 2000);
+});
+
+document.addEventListener('fullscreenchange', () => {
+    const statusScreen = document.getElementById('status-screen');
+    if (document.fullscreenElement) {
+        statusScreen.textContent = 'FULLSCREEN';
+        statusScreen.className = 'status negative';
+        logActivity('Entered Fullscreen mode', 'alert');
+    } else {
+        statusScreen.textContent = 'Stable';
+        statusScreen.className = 'status positive';
+        logActivity('Exited Fullscreen mode', 'info');
+    }
+});
+
+// 8. Media/Recording Detection (Permissions & DisplayMedia)
+async function monitorMedia() {
+    const statusMedia = document.getElementById('status-media');
+    
+    // Check for Screen Capture (if supported)
+    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        // We can't actually detect if they ARE recording without asking, 
+        // but we can detect if the API is available and if they start it.
+        // For security testing, we can monitor visibilitychange which triggers on some recording overlays.
+    }
+
+    // Monitor Visibility API for potential overlays
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            logActivity('Page hidden (user switched tab or minimized)', 'info');
+        } else {
+            logActivity('Page visible again', 'info');
+        }
+    });
+}
+
 // Initial Checks
 window.onload = () => {
     logActivity('Security Dashboard Started', 'system');
     detectIncognito();
+    monitorMedia();
 
     // DevTools check is tricky, run it periodically and on resize
     setInterval(detectDevTools, 2000);

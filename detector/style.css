@@ -136,6 +136,17 @@ header p {
     font-size: 0.9rem;
 }
 
+.info-list {
+    margin-top: 0.5rem;
+    padding-left: 1.25rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.info-list li {
+    margin-bottom: 0.2rem;
+}
+
 .event-log {
     background: var(--card-bg);
     border-radius: var(--border-radius);
