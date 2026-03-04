@@ -3,60 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EverythingTT - Infinite Uptime</title>
-    <link rel="stylesheet" href="assets/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' http://localhost:8001;">
+    <title>EverythingTT Security Research Center</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>EverythingTT Security Research Center</h1>
+            <p>Official research hub for the EverythingTT project security system. Monitor, detect, and analyze browser-level interactions and environment states.</p>
+            <div style="margin-top:1.5rem; display:flex; justify-content:center; gap:1.5rem; font-size:0.85rem;">
+                <a href="docs.html" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Developer Guide</a>
+                <a href="SECURITY.md" target="_blank" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Security Policy</a>
+                <a href="#card-injection" style="color:var(--primary-color); text-decoration:none; font-weight:600;">Deployment Agent</a>
+            </div>
+        </header>
 
-    <header>
-        <div class="logo">EverythingTT</div>
-        <nav>
-            <ul>
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="eco/index.html">Economy</a></li>
-                <li><a href="tube/index.html">Tube</a></li>
-                <li><a href="news/index.html">News</a></li>
-            </ul>
-        </nav>
-        <div class="user-panel">
-            <!-- Auth State Injected Here -->
-        </div>
-    </header>
+        <main class="dashboard">
+            <!-- Detection Cards -->
+            <section class="card" id="card-devtools">
+                <div class="card-header">
+                    <span class="icon">🔍</span>
+                    <h3>DevTools Killer V2 [HARDENED]</h3>
+                </div>
+                <div class="status" id="status-devtools">Checking...</div>
+                <div class="description">
+                    <p>Prevents inspection via <strong>Infinite Debugger Loops</strong> and <strong>Visual Blinding</strong>.</p>
+                    <ul class="info-list" style="margin-top:0.5rem; font-size:0.7rem;">
+                        <li>Prevention: Blurs content on tool activation</li>
+                        <li>Stalling: High-frequency recursive traps</li>
+                        <li>Destructive: Wipes local data on violation</li>
+                    </ul>
+                </div>
+                <a href="docs.html#devtools" class="card-doc-link">Technical Docs →</a>
+            </section>
 
-    <main class="container">
-        <section class="hero">
-            <h1>Welcome to EverythingTT</h1>
-            <p>The infinite platform for trading, watching, and creating.</p>
-            <div class="cta-group">
-                <a href="eco/index.html" class="btn btn-primary">Start Trading</a>
-                <a href="tube/index.html" class="btn btn-secondary">Watch Videos</a>
+            <section class="card" id="card-incognito">
+                <div class="card-header">
+                    <span class="icon">🕵️</span>
+                    <h3>Incognito Mode</h3>
+                </div>
+                <div class="status" id="status-incognito">Checking...</div>
+                <div class="description">
+                    <p>Detects if the browser is running in private or incognito mode.</p>
+                    <ul class="info-list">
+                        <li>Browsing history not saved</li>
+                        <li>Cookies and site data not saved</li>
+                        <li>Form data not saved</li>
+                    </ul>
+                </div>
+                <a href="docs.html#incognito" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-clicks">
+                <div class="card-header">
+                    <span class="icon">🖱️</span>
+                    <h3>Click Monitoring</h3>
+                </div>
+                <div class="status" id="status-clicks">0 Clicks</div>
+                <p class="description">Tracks mouse click interactions within the page.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-contextmenu">
+                <div class="card-header">
+                    <span class="icon">📋</span>
+                    <h3>Context Menu</h3>
+                </div>
+                <div class="status" id="status-contextmenu">No action</div>
+                <p class="description">Monitors right-click (context menu) attempts.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-shortcuts">
+                <div class="card-header">
+                    <span class="icon">⌨️</span>
+                    <h3>Shortcuts (F12/Ctrl+Shift+I)</h3>
+                </div>
+                <div class="status" id="status-shortcuts">No action</div>
+                <p class="description">Detects usage of common inspection keyboard shortcuts.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-focus">
+                <div class="card-header">
+                    <span class="icon">👁️</span>
+                    <h3>Window Focus</h3>
+                </div>
+                <div class="status" id="status-focus">Focused</div>
+                <p class="description">Detects if the window is currently focused or hidden (blur).</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-screen">
+                <div class="card-header">
+                    <span class="icon">📺</span>
+                    <h3>Screen Changes</h3>
+                </div>
+                <div class="status" id="status-screen">Stable</div>
+                <p class="description">Detects window resizing or full-screen mode entries.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-media">
+                <div class="card-header">
+                    <span class="icon">🎥</span>
+                    <h3>Media/Recording</h3>
+                </div>
+                <div class="status" id="status-media">Not active</div>
+                <p class="description">Monitors for screen capture or camera/mic permission requests.</p>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <!-- Voice Monitor Card -->
+            <section class="card" id="card-voice">
+                <div class="card-header">
+                    <span class="icon">🎙️</span>
+                    <h3>Voice Monitor</h3>
+                </div>
+                <div class="status" id="status-voice">Ready</div>
+                <div class="description">
+                    <p style="margin-bottom:0.75rem;">Simulates unauthorized audio capture and local storage persistence.</p>
+                    <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+                        <button id="btn-record-voice" onclick="toggleVoiceRecording()" style="flex:1; padding:0.5rem; background:var(--status-negative); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem;">🔴 Record</button>
+                        <button id="btn-play-voice" onclick="playStoredVoice()" style="flex:1; padding:0.5rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem; display:none;">▶️ Replay</button>
+                    </div>
+                    <div id="voice-metadata" style="font-size:0.7rem; color:var(--secondary-color); font-style:italic;">No recording stored.</div>
+                </div>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <!-- AI Research & Prompt Injection Card -->
+            <section class="card" id="card-ai-research">
+                <div class="card-header">
+                    <span class="icon">🤖</span>
+                    <h3>AI Research Hub</h3>
+                </div>
+                <div class="status" id="status-ai">Monitoring</div>
+                <div class="description">
+                    <p>Detects interactions with AI platforms and simulates <strong>Prompt Injection</strong> research payloads.</p>
+                    <ul class="info-list" style="margin-top:0.5rem; margin-bottom:1rem;">
+                        <li>Detects: ChatGPT, Claude, Gemini</li>
+                        <li>Monitors: Prompt input & submission</li>
+                        <li>Simulation: Automated payload injection</li>
+                    </ul>
+                    <div style="padding:0.75rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+                        <p style="font-size:0.7rem; color:var(--secondary-color); margin-bottom:0.5rem;"><strong>Research Status:</strong> Active across all monitored agents.</p>
+                        <button onclick="window.location.href='#card-injection'" style="width:100%; padding:0.5rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600;">Manage Agents</button>
+                    </div>
+                </div>
+                <a href="docs.html#ai" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <!-- End-To-End Encryption (E2EE) Module -->
+            <section class="card" id="card-e2ee">
+                <div class="card-header">
+                    <span class="icon">🔐</span>
+                    <h3>E2EE Research</h3>
+                </div>
+                <div class="status" id="status-e2ee">Inactive</div>
+                <div class="description">
+                    <p style="margin-bottom:0.75rem;">Simulate <strong>End-To-End Encryption</strong> to test data privacy and man-in-the-middle resilience.</p>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+                        <input type="text" id="e2ee-message" placeholder="Message to encrypt..." style="padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem;">
+                        <input type="password" id="e2ee-key" placeholder="Secret Key (min 8 chars)" style="padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem;">
+                        <button onclick="runE2EETest()" style="padding:0.5rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Run Security Test</button>
+                    </div>
+                    <div id="e2ee-result" style="display:none; font-size:0.7rem; padding:0.75rem; background:#f1f5f9; border-radius:8px; border:1px solid #cbd5e1;">
+                        <div style="margin-bottom:0.5rem;"><strong>Ciphertext:</strong> <code id="e2ee-cipher" style="word-break:break-all; color:#ef4444;"></code></div>
+                        <div><strong>Decrypted:</strong> <code id="e2ee-plain" style="color:#10b981;"></code></div>
+                    </div>
+                </div>
+                <a href="docs.html#e2ee" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <!-- Typing Test Card -->
+            <section class="card" id="card-typing">
+                <div class="card-header">
+                    <span class="icon">⌨️</span>
+                    <h3>Typing Monitor</h3>
+                </div>
+                <div class="status" id="status-typing">Waiting...</div>
+                <div class="description">
+                    <p style="margin-bottom:0.75rem;">Test the security system's ability to detect input focus and keyboard activity.</p>
+                    <input type="text" id="typing-test-input" placeholder="Type here to test..." style="width:100%; padding:0.75rem; border:1px solid #e2e8f0; border-radius:8px; font-family:inherit; outline:none; transition:border-color 0.2s;">
+                    <p id="typing-metadata" style="font-size:0.7rem; margin-top:0.5rem; color:var(--secondary-color); font-style:italic;">Target: None</p>
+                </div>
+                <a href="docs.html#monitoring" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-dom">
+                <div class="card-header">
+                    <span class="icon">🏗️</span>
+                    <h3>DOM Injection</h3>
+                </div>
+                <div class="status" id="status-dom">No changes</div>
+                <p class="description">Detects external scripts or extensions injecting HTML elements into the page.</p>
+                <a href="docs.html#dom" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-userscript">
+                <div class="card-header">
+                    <span class="icon">📜</span>
+                    <h3>Userscript Killer</h3>
+                </div>
+                <div class="status" id="status-userscript">Active</div>
+                <p class="description">Neutralizes userscripts by freezing environment globals and blocking injections.</p>
+                <a href="docs.html#agents" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-hardware">
+                <div class="card-header">
+                    <span class="icon">💻</span>
+                    <h3>Hardware Info</h3>
+                </div>
+                <div class="status" id="status-hardware">Loading...</div>
+                <div class="description">
+                    <ul class="info-list" id="hardware-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+                <a href="docs.html#hardware" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-bypass">
+                <div class="card-header">
+                    <span class="icon">🛡️</span>
+                    <h3>Bypass Detection</h3>
+                </div>
+                <div class="status" id="status-bypass">Checking...</div>
+                <p class="description">Detects automation tools (Selenium, Puppeteer) and virtualized environments (VMs).</p>
+                <a href="docs.html#hardware" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-desktop-scan">
+                <div class="card-header">
+                    <span class="icon">🖥️</span>
+                    <h3>Desktop Scanner</h3>
+                </div>
+                <div class="status" id="status-desktop-scan">Offline</div>
+                <div class="description">
+                    <p>Scans for automation apps (Java, Python, C#) running on your local desktop.</p>
+                    <div id="agent-launcher" style="margin-top:1rem; padding:0.75rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+                        <p style="font-size:0.75rem; margin-bottom:0.5rem; color:var(--secondary-color);"><strong>Local Agent Required:</strong> To enable scanning, run the <code>detector.py</code> script on your machine.</p>
+                        <button onclick="copyLaunchCommand()" style="width:100%; padding:0.5rem; background:var(--header-bg); color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.8rem; font-weight:600; margin-bottom:0.5rem;">📋 Copy Start Command</button>
+                        <p id="launch-hint" style="font-size:0.65rem; text-align:center; opacity:0.7; color:var(--status-positive); display:none;">Command copied! Paste into Terminal.</p>
+                    </div>
+                    <ul class="info-list" id="desktop-scan-list">
+                        <!-- Populated by backend API -->
+                    </ul>
+                </div>
+                <a href="docs.html#desktop" class="card-doc-link">Technical Docs →</a>
+            </section>
+
+            <section class="card" id="card-injection">
+                <div class="card-header">
+                    <span class="icon">💉</span>
+                    <h3>Cross-Site Monitoring</h3>
+                </div>
+                <div class="status" id="status-injection">Ready</div>
+                <p class="description">Demonstrates a <strong>Cross-Site Message Injection</strong> used by the Security system to broadcast monitoring status to all contexts.</p>
+                <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                    <button onclick="openRemoteTarget()" style="flex:1; padding:0.5rem; background:var(--secondary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem;">1. Open Remote Target</button>
+                    <button onclick="simulateCrossSiteInjection()" style="flex:1.5; padding:0.5rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem;">2. Broadcast Monitoring</button>
+                </div>
+                
+                <div class="description" style="margin-top:1rem; padding:1rem; background:#f1f5f9; border-radius:8px; border:1px dashed var(--primary-color);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <strong style="font-size:0.85rem;">Global Security Agent</strong>
+                        <div style="display:flex; gap:0.5rem;">
+                            <button onclick="openScriptModal()" style="padding:6px 12px; font-size:0.75rem; background:var(--secondary-color); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">View Script</button>
+                            <a href="https://greasyfork.org/en/scripts/568241-everythingtt-security-agent" target="_blank" style="padding:6px 12px; font-size:0.75rem; background:#10b981; color:white; border:none; border-radius:4px; cursor:pointer; text-decoration:none; font-weight:bold;">Install from GreasyFork</a>
+                        </div>
+                    </div>
+                    <p style="font-size:0.75rem; opacity:0.8; margin-bottom:0.75rem;">For automatic cross-site monitoring, install the EverythingTT Security Agent using a UserScript manager like Tampermonkey.</p>
+                    <div style="margin-top:0.75rem; display:flex; align-items:center; gap:0.75rem;">
+                        <a id="bookmarklet-link" href="#" style="flex:1; text-align:center; color:var(--primary-color); text-decoration:none; font-weight:bold; padding:8px; border:2px solid var(--primary-color); border-radius:6px; background:white; font-size:0.8rem;">Drag Bookmarklet to Bar</a>
+                        <span style="font-size:0.7rem; flex:1; opacity:0.8;">Or click it on any site for manual injection.</span>
+                    </div>
+                </div>
+
+                <div class="description" style="margin-top:1rem; padding:0.5rem; background:#fff1f2; border-radius:6px; font-size:0.75rem; border:1px solid #fecaca;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <strong>Live Monitored Sessions:</strong>
+                        <button onclick="clearLiveSessions()" style="padding:2px 6px; font-size:0.6rem; background:none; border:1px solid #fecaca; color:#ef4444; border-radius:4px; cursor:pointer;">Clear All</button>
+                    </div>
+                    <ul id="live-sessions-list" class="info-list" style="max-height:150px; overflow-y:auto; padding-left:0; list-style:none;">
+                        <li>Waiting for remote sessions...</li>
+                    </ul>
+                </div>
+                <a href="docs.html#agents" class="card-doc-link">Technical Docs →</a>
+            </section>
+        </main>
+
+        <!-- Developer Guide Section -->
+        <section id="dev-guide" class="event-log" style="margin-top:2rem;">
+            <h2>EverythingTT Developer Guide</h2>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:2rem; margin-top:1.5rem;">
+                <div>
+                    <h3 style="color:var(--primary-color); font-size:1.1rem; margin-bottom:0.75rem;">Architecture Overview</h3>
+                    <p style="font-size:0.85rem; color:var(--secondary-color); line-height:1.6;">EverythingTT operates on a <b>Distributed Monitoring</b> model. The central Research Dashboard communicates with local <b>C2 Agents</b> (Python) to scan for desktop automation, while <b>Remote Security Agents</b> (UserScripts) report site-specific activity back to the dashboard via standard <code>postMessage</code> and <code>fetch</code> APIs.</p>
+                </div>
+                <div>
+                    <h3 style="color:var(--primary-color); font-size:1.1rem; margin-bottom:0.75rem;">Deployment Workflow</h3>
+                    <ol style="font-size:0.85rem; color:var(--secondary-color); line-height:1.6; padding-left:1.25rem;">
+                        <li>Start the C2 Backend: <code>python detector.py</code></li>
+                        <li>Install the <a href="https://greasyfork.org/en/scripts/568241-everythingtt-security-agent" target="_blank" style="color:var(--primary-color);">Global Agent</a> via GreasyFork.</li>
+                        <li>Monitor real-time interactions in the <b>Live Monitored Sessions</b> card.</li>
+                        <li>Simulate alerts via <b>Cross-Site Broadcasts</b>.</li>
+                    </ol>
+                </div>
+                <div>
+                    <h3 style="color:var(--primary-color); font-size:1.1rem; margin-bottom:0.75rem;">Contributing</h3>
+                    <p style="font-size:0.85rem; color:var(--secondary-color); line-height:1.6;">Researchers can contribute by adding new detection modules. View our <a href="docs.html" style="color:var(--primary-color); font-weight:600;">Technical Documentation</a> for code samples and implementation details.</p>
+                </div>
             </div>
         </section>
 
-        <div class="grid">
-            <div class="card">
-                <h3>💰 Economy</h3>
-                <p>Trade ETT Coins & Territorial.io Gold. Play Casino, buy Marketplace items.</p>
-                <a href="eco/index.html" class="mt-1">Go to Economy &rarr;</a>
+        <section class="event-log" style="margin-top:2rem;">
+            <h2>Activity Log</h2>
+            <div id="log-container" class="log-container">
+                <div class="log-entry system">System initialized...</div>
             </div>
-            <div class="card">
-                <h3>📺 Tube</h3>
-                <p>Share videos, shorts, and music. Monetize with Memberships.</p>
-                <a href="tube/index.html" class="mt-1">Go to Tube &rarr;</a>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+    <!-- Hidden iframe for cross-site demonstration -->
+    <iframe id="security-context-iframe" style="display:none;" srcdoc="<html><body><script>window.addEventListener('message', (e) => { if(e.data.type === 'TRIGGER_BROADCAST') { window.parent.postMessage({type: 'SECURITY_MONITOR', message: e.data.message}, '*'); } });</script></body></html>"></iframe>
+
+    <!-- Script View Modal -->
+    <div id="script-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:100000; align-items:center; justify-content:center;">
+        <div style="background:white; width:90%; max-width:800px; border-radius:12px; padding:2rem; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+            <h2 style="margin-bottom:1rem; color:var(--header-bg);">EverythingTT Security Agent</h2>
+            <p style="font-size:0.85rem; margin-bottom:1rem; color:var(--secondary-color);">Copy this script into your UserScript manager (Tampermonkey, Greasemonkey, etc.) for local research.</p>
+            <pre id="modal-userscript-code" style="background:#f1f5f9; padding:1.5rem; border-radius:8px; overflow:auto; max-height:400px; font-size:0.75rem; font-family:'Fira Code', monospace; border:1px solid #e2e8f0;"></pre>
+            <div style="margin-top:1.5rem; display:flex; justify-content:flex-end; gap:1rem;">
+                <button onclick="copyModalScript(this)" style="padding:10px 20px; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Copy to Clipboard</button>
+                <button onclick="closeScriptModal()" style="padding:10px 20px; background:#e2e8f0; color:var(--text-color); border:none; border-radius:6px; cursor:pointer; font-weight:600;">Close</button>
             </div>
-            <div class="card">
-                <h3>📰 News</h3>
-                <p>Independent journalism platform. Write articles and share your truth.</p>
-                <a href="news/index.html" class="mt-1">Read News &rarr;</a>
-            </div>
+            <button onclick="closeScriptModal()" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; font-size:1.5rem; cursor:pointer; opacity:0.5;">&times;</button>
         </div>
-    </main>
-
-    <footer>
-        <p>&copy; 2026 EverythingTT. Built for the Community.</p>
-    </footer>
-
-    <script type="module" src="js/main.js"></script>
+    </div>
 </body>
 </html>
