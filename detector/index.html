@@ -321,6 +321,29 @@
                 </div>
                 <a href="docs.html#agents" class="card-doc-link">Technical Docs →</a>
             </section>
+
+            <section class="card" id="card-payload-manager">
+                <div class="card-header">
+                    <span class="icon">📜</span>
+                    <h3>Payload Manager</h3>
+                </div>
+                <div class="status" id="status-payloads">Syncing...</div>
+                <div class="description">
+                    <p style="margin-bottom:0.75rem;">Manage the <strong>Research Payloads</strong> used for prompt injection simulations. These are automatically synced to active agents.</p>
+                    
+                    <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+                        <input type="text" id="new-payload-input" placeholder="Enter new research payload..." style="flex:1; padding:0.5rem; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem;">
+                        <button onclick="addNewPayload()" style="padding:0.5rem 1rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Add</button>
+                    </div>
+
+                    <div style="max-height:250px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc; padding:0.5rem;">
+                        <ul id="payload-list" style="list-style:none; padding-left:0; font-size:0.75rem;">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
+                </div>
+                <a href="docs.html#payloads" class="card-doc-link">Technical Docs →</a>
+            </section>
         </main>
 
         <!-- Developer Guide Section -->

