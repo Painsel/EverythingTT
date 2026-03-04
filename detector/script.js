@@ -21,7 +21,7 @@ function killDevTools() {
     if (lockdownActive) return;
 
     const start = performance.now();
-    // Complex nested structure to make debugger harder to ignore
+    // Recursive debugger trap to freeze the inspection process
     (function antiDebug(n) {
         if (lockdownActive) return;
         (function() {
@@ -32,24 +32,28 @@ function killDevTools() {
             }());
         }());
         if (n > 0) antiDebug(n - 1);
-    }(0));
+    }(10)); // Increased recursion depth for harder stall
     const end = performance.now();
     
-    // If execution was stalled by more than 100ms, a breakpoint was hit
-    if (end - start > 100) {
+    if (end - start > 50) {
         detectionCount++;
         logActivity(`Anti-debugging: stall detected (${Math.round(end - start)}ms) #${detectionCount}`, 'alert');
         
-        // If detected too many times, trigger lockdown
+        // Prevent viewing by blurring or hiding content even before lockdown
+        document.body.style.filter = 'blur(20px) grayscale(1)';
+        document.body.style.pointerEvents = 'none';
+
         if (detectionCount > 3) {
             triggerLockdown();
         } else {
-            // High frequency stalling if open
-            setTimeout(killDevTools, 20);
+            setTimeout(killDevTools, 10); // Extremely high frequency
         }
     } else {
-        // Decay detection count if it's closed
-        if (detectionCount > 0) detectionCount -= 0.5;
+        if (!lockdownActive) {
+            document.body.style.filter = '';
+            document.body.style.pointerEvents = '';
+        }
+        if (detectionCount > 0) detectionCount -= 0.2;
     }
 }
 
@@ -57,23 +61,35 @@ function triggerLockdown() {
     if (lockdownActive) return;
     lockdownActive = true;
     
-    // Attempt to clear all intervals to stop the page
+    // Destructive actions: Clear all local research data
+    localStorage.clear();
+    sessionStorage.clear();
+    logActivity('DESTRUCTIVE LOCKDOWN: Local data wiped to prevent exfiltration', 'alert');
+
+    // Kill all active processes/intervals
     let id = window.setTimeout(function() {}, 0);
     while (id--) { window.clearTimeout(id); }
     
     document.body.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#0f172a; color:#ef4444; font-family:'Fira Code', monospace; text-align:center; padding:40px; border: 10px solid #ef4444;">
-            <div style="font-size:5rem; margin-bottom:1rem;">⚠️</div>
-            <h1 style="font-size:2.5rem; margin-bottom:1rem; letter-spacing:-1px;">EVERYTHINGTT SECURITY LOCKDOWN</h1>
-            <div style="background:#1e293b; padding:20px; border-radius:12px; margin-bottom:2rem; text-align:left; max-width:600px; border-left:4px solid #ef4444;">
-                <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:10px;">// CRITICAL SECURITY VIOLATION DETECTED</p>
-                <p style="font-size:1.1rem; line-height:1.6;">Unauthorized inspection or persistent debugging detected. Access to the EverythingTT Research Center has been revoked to protect sensitive modules.</p>
-                <p style="color:#94a3b8; font-size:0.9rem; margin-top:10px;">// ERROR_CODE: ERR_HARDENED_INSPECTION_V2</p>
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#020617; color:#ef4444; font-family:'Fira Code', monospace; text-align:center; padding:40px; border: 20px solid #ef4444;">
+            <div style="font-size:6rem; margin-bottom:1rem; text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);">🚫</div>
+            <h1 style="font-size:3rem; margin-bottom:1rem; letter-spacing:-2px; font-weight:900;">ENVIRONMENT COMPROMISED</h1>
+            <div style="background:#0f172a; padding:30px; border-radius:16px; margin-bottom:2rem; text-align:left; max-width:700px; border:1px solid #1e293b; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+                <p style="color:#ef4444; font-size:1rem; margin-bottom:15px; font-weight:bold;">// ACCESS PERMANENTLY REVOKED</p>
+                <p style="font-size:1.1rem; line-height:1.6; color:#e2e8f0;">Persistent debugging or source-code inspection attempts detected. The EverythingTT Security Research Center has initiated a <b>Hardened State Protection</b> sequence.</p>
+                <ul style="color:#94a3b8; font-size:0.85rem; margin-top:20px; list-style:none; padding:0;">
+                    <li style="margin-bottom:5px;">> Local session data: WIPED</li>
+                    <li style="margin-bottom:5px;">> API communication: SEVERED</li>
+                    <li style="margin-bottom:5px;">> Source protection: ACTIVE</li>
+                </ul>
             </div>
-            <button onclick="location.reload()" style="padding:14px 32px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:800; text-transform:uppercase; transition:transform 0.2s;">Reset Research Session</button>
+            <button onclick="location.reload()" style="padding:16px 40px; background:#ef4444; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:900; text-transform:uppercase; font-size:1rem; box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);">Re-Verify Identity</button>
         </div>
     `;
-    logActivity('EVERYTHINGTT SYSTEM LOCKDOWN: Research environment hardened and access revoked', 'alert');
+    
+    // Prevent context menu and shortcuts even on lockdown screen
+    document.oncontextmenu = () => false;
+    document.onkeydown = () => false;
 }
 
 function detectDevTools() {

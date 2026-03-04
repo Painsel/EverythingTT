@@ -150,21 +150,18 @@
         </section>
 
         <section id="devtools" class="doc-section">
-            <span class="tag">Anti-Debugging</span>
-            <h1>DevTools Killer V2</h1>
-            <p>Our most aggressive module. It uses multiple techniques to detect and stall browser developer tools, making unauthorized inspection extremely difficult.</p>
+            <span class="tag">Anti-Debugging & Prevention</span>
+            <h1>DevTools Killer V2 [HARDENED]</h1>
+            <p>Our most aggressive module. It goes beyond simple detection to prevent unauthorized inspection entirely by disrupting the browser's execution flow and visual interface.</p>
             
-            <h2>Detection Mechanism</h2>
-            <p>We use timing-based detection. If a <code>debugger</code> statement is executed, it will pause the script if DevTools is open. We measure the time taken for this pause.</p>
-            <pre><code>const start = performance.now();
-debugger;
-const end = performance.now();
-if (end - start > 100) {
-    // DevTools is open
-}</code></pre>
+            <h2>Visual Blinding (Blind Mode)</h2>
+            <p>To prevent researchers from viewing the page content while tools are open, we apply a heavy CSS blur and disable interaction immediately upon detection.</p>
+            <pre><code>// Applied instantly when timing stall is detected
+document.body.style.filter = 'blur(20px) grayscale(1)';
+document.body.style.pointerEvents = 'none';</code></pre>
 
-            <h2>Hardened Stalling</h2>
-            <p>To prevent researchers from simply clicking "Disable breakpoints", we use a recursive self-invoking function structure.</p>
+            <h2>Recursive Hardened Stalling</h2>
+            <p>We use a high-depth recursive structure for the <code>debugger</code> trap. This makes it significantly harder for browsers to "skip" the breakpoints and can even cause the DevTools process to become unresponsive.</p>
             <pre><code>(function antiDebug(n) {
     (function() {
         (function() {
@@ -172,7 +169,14 @@ if (end - start > 100) {
         }());
     }());
     if (n > 0) antiDebug(n - 1);
-}(0));</code></pre>
+}(10)); // Depth 10 for maximum impact</code></pre>
+
+            <h2>Destructive Lockdown</h2>
+            <p>If persistent attempts are detected, the system initiates a destructive lockdown. This wipes all local research data (LocalStorage, SessionStorage) to prevent data exfiltration before severing all active script intervals.</p>
+            <pre><code>// Security Lockdown Logic
+localStorage.clear();
+sessionStorage.clear();
+document.body.innerHTML = "ENVIRONMENT COMPROMISED";</code></pre>
         </section>
 
         <section id="incognito" class="doc-section">
