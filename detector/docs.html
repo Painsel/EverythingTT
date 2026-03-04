@@ -177,6 +177,15 @@ document.body.style.pointerEvents = 'none';</code></pre>
 localStorage.clear();
 sessionStorage.clear();
 document.body.innerHTML = "ENVIRONMENT COMPROMISED";</code></pre>
+
+            <h2>Anti-Analysis Disruption Suite</h2>
+            <p>To prevent researchers from gaining useful information from specific DevTools tabs, the system enters <b>Disruption Mode</b> immediately upon detection.</p>
+            <ul>
+                <li><b>Network Flooding:</b> Generates fake API requests to various endpoints (e.g., <code>/auth</code>, <code>/telemetry</code>) to hide legitimate C2 traffic in the Network tab.</li>
+                <li><b>Console Eraser:</b> Clears the console at 1-second intervals and injects warning messages, preventing log analysis and script execution.</li>
+                <li><b>Storage Obfuscation:</b> Overwrites sensitive keys in <code>localStorage</code> with random noise to prevent inspection of the Application tab.</li>
+                <li><b>Reload Blocking:</b> Uses the <code>beforeunload</code> event to warn and prevent page reloads, making it harder to capture initial network traffic.</li>
+            </ul>
         </section>
 
         <section id="incognito" class="doc-section">

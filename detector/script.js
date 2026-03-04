@@ -14,6 +14,54 @@ function logActivity(message, type = 'info') {
 let devtoolsOpen = false;
 let lockdownActive = false;
 let detectionCount = 0;
+let disruptionIntervals = [];
+
+// --- Anti-Analysis Suite ---
+
+// 1. Network Noise: Floods the Network tab with fake requests to hide real C2 traffic
+function generateNetworkNoise() {
+    if (!devtoolsOpen || lockdownActive) return;
+    const endpoints = ['/auth', '/api/v1/telemetry', '/metrics', '/config/sync', '/heartbeat', '/debug/dump'];
+    const fakeUrl = endpoints[Math.floor(Math.random() * endpoints.length)] + '?t=' + Date.now();
+    
+    // Use a non-existent port or local route to avoid actual server impact while showing in DevTools
+    fetch('http://localhost:8001' + fakeUrl, { mode: 'no-cors' }).catch(() => {});
+}
+
+// 2. Console Eraser: Aggressively clears the console to prevent viewing logs or executing scripts
+function eraseConsole() {
+    if (!devtoolsOpen || lockdownActive) return;
+    console.clear();
+    console.log("%c EVERYTHINGTT SECURITY: INSPECTION PROHIBITED ", "background: red; color: white; font-size: 20px; font-weight: bold;");
+    console.log("Active monitoring detected. Environment state has been obfuscated.");
+}
+
+// 3. Storage Obfuscation: Wipes or rotates sensitive research keys when tools are active
+function obfuscateStorage() {
+    if (!devtoolsOpen || lockdownActive) return;
+    // Wipe specific sensitive research keys before they can be inspected
+    const sensitiveKeys = ['everythingtt_last_voice', 'ett_research_token', 'agent_session_id'];
+    sensitiveKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+            localStorage.setItem(key, 'REDACTED_' + Math.random().toString(36).substring(7));
+        }
+    });
+}
+
+// Start Disruption Mode
+function startDisruption() {
+    if (disruptionIntervals.length > 0) return;
+    logActivity('DISRUPTION MODE: Network and Storage protection active', 'alert');
+    disruptionIntervals.push(setInterval(generateNetworkNoise, 500));
+    disruptionIntervals.push(setInterval(eraseConsole, 1000));
+    disruptionIntervals.push(setInterval(obfuscateStorage, 2000));
+}
+
+// Stop Disruption Mode
+function stopDisruption() {
+    disruptionIntervals.forEach(clearInterval);
+    disruptionIntervals = [];
+}
 
 // Aggressive "Killer" function: stalls DevTools by repeatedly triggering debugger
 // and using complex self-invoking structures to bypass simple "disable breakpoint" attempts.
@@ -159,6 +207,7 @@ function detectDevTools() {
             statusDevTools.textContent = `DETECTED (${method})`;
             statusDevTools.className = 'status negative';
             logActivity(`Developer Tools detected via ${method}!`, 'alert');
+            startDisruption();
         }
     } else {
         if (devtoolsOpen) {
@@ -166,9 +215,19 @@ function detectDevTools() {
             statusDevTools.textContent = 'Not detected';
             statusDevTools.className = 'status positive';
             logActivity('Developer Tools closed', 'info');
+            stopDisruption();
         }
     }
 }
+
+// Reload Prevention: Warn user and attempt to block reload if inspection is active
+window.addEventListener('beforeunload', (e) => {
+    if (devtoolsOpen && !lockdownActive) {
+        logActivity('RELOAD ATTEMPT: Prevented potential network log capture', 'alert');
+        e.preventDefault();
+        e.returnValue = 'Security research in progress. Reloading will terminate active modules.';
+    }
+});
 
 // 2. Improved Incognito/Private Mode Detection
 async function detectIncognito() {
