@@ -706,6 +706,7 @@ async function detectHardware() {
     const statusHardware = document.getElementById('status-hardware');
     const hardwareList = document.getElementById('hardware-list');
     const statusBypass = document.getElementById('status-bypass');
+    if (!hardwareList) return;
     hardwareList.innerHTML = '';
     let isSandbox = false;
     let sandboxReasons = [];
@@ -743,7 +744,6 @@ async function detectHardware() {
             addInfo('GPU Vendor', vendor);
             addInfo('GPU Renderer', renderer);
             
-            // Heuristic for VMs/Software rendering
             const lowerRenderer = renderer.toLowerCase();
             const virtualizationStrings = ['virtualbox', 'vmware', 'software adapter', 'swiftshader', 'mesa', 'llvmpipe', 'parallels'];
             virtualizationStrings.forEach(v => {
@@ -757,7 +757,6 @@ async function detectHardware() {
         addInfo('GPU', 'Detection failed');
     }
 
-    // Battery Info (Virtual machines often lack battery or have static values)
     if ('getBattery' in navigator) {
         try {
             const battery = await navigator.getBattery();
@@ -767,13 +766,13 @@ async function detectHardware() {
         } catch (e) {}
     }
 
-    // Screen Info
     addInfo('Resolution', `${window.screen.width}x${window.screen.height}`);
     
-    statusHardware.textContent = 'Hardware Profiled';
-    statusHardware.className = 'status positive';
+    if (statusHardware) {
+        statusHardware.textContent = 'Hardware Profiled';
+        statusHardware.className = 'status positive';
+    }
 
-    // Automation Check (part of bypass detection)
     let isAutomated = false;
     let automationReasons = [];
     if (navigator.webdriver) {
@@ -784,23 +783,86 @@ async function detectHardware() {
         isAutomated = true;
         automationReasons.push('Automation window signature');
     }
-    // Headless detection
     if (navigator.plugins && navigator.plugins.length === 0) {
         isAutomated = true;
         automationReasons.push('No plugins (potential Headless mode)');
     }
 
-    if (isAutomated || isSandbox) {
-        statusBypass.textContent = isAutomated ? 'AUTOMATION DETECTED' : 'SANDBOX DETECTED';
-        statusBypass.className = 'status negative';
-        const allReasons = [...automationReasons, ...sandboxReasons].join(', ');
-        logActivity(`Bypass heuristic triggered: ${allReasons}`, 'alert');
-    } else {
-        statusBypass.textContent = 'Normal Client';
-        statusBypass.className = 'status positive';
+    if (statusBypass) {
+        if (isAutomated || isSandbox) {
+            statusBypass.textContent = isAutomated ? 'AUTOMATION DETECTED' : 'SANDBOX DETECTED';
+            statusBypass.className = 'status negative';
+            const allReasons = [...automationReasons, ...sandboxReasons].join(', ');
+            logActivity(`Bypass heuristic triggered: ${allReasons}`, 'alert');
+        } else {
+            statusBypass.textContent = 'Normal Client';
+            statusBypass.className = 'status positive';
+        }
     }
 
     logActivity('Hardware and environment scan complete', 'info');
+}
+
+// 11.1 Geolocation Profiling & Reverse Geocoding
+async function requestGeoLocation() {
+    const statusGeo = document.getElementById('status-geo');
+    const geoList = document.getElementById('geo-info-list');
+    
+    if (!navigator.geolocation) {
+        statusGeo.textContent = 'NOT SUPPORTED';
+        statusGeo.className = 'status negative';
+        logActivity('Geolocation API not supported by this browser', 'alert');
+        return;
+    }
+
+    statusGeo.textContent = 'REQUESTING...';
+    statusGeo.className = 'status neutral';
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        logActivity(`Coordinates captured: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`, 'info');
+        
+        statusGeo.textContent = 'RESOLVING...';
+        
+        try {
+            // Use OpenStreetMap Nominatim for Reverse Geocoding (Free/Educational)
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
+            const data = await response.json();
+            
+            if (data && data.address) {
+                const addr = data.address;
+                const info = [
+                    { label: 'Street', value: addr.road || addr.pedestrian || addr.suburb || 'Unknown' },
+                    { label: 'City', value: addr.city || addr.town || addr.village || 'Unknown' },
+                    { label: 'Zip Code', value: addr.postcode || 'Unknown' },
+                    { label: 'Country', value: addr.country || 'Unknown' },
+                    { label: 'Lat/Long', value: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }
+                ];
+
+                geoList.innerHTML = '';
+                info.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${item.label}:</strong> ${item.value}`;
+                    geoList.appendChild(li);
+                });
+
+                geoList.style.display = 'block';
+                statusGeo.textContent = 'PROFILED';
+                statusGeo.className = 'status positive';
+                logActivity(`Location profiled: ${addr.city || 'Unknown'}, ${addr.country || 'Unknown'}`, 'info');
+            } else {
+                throw new Error('Could not resolve address');
+            }
+        } catch (err) {
+            statusGeo.textContent = 'API ERROR';
+            statusGeo.className = 'status negative';
+            logActivity('Reverse geocoding failed (API rate limit or connection issue)', 'alert');
+        }
+    }, (err) => {
+        statusGeo.textContent = 'DENIED';
+        statusGeo.className = 'status negative';
+        logActivity(`Geolocation access denied: ${err.message}`, 'alert');
+    });
 }
 
 // 12. Input Heuristics (Bot detection)
@@ -1302,6 +1364,20 @@ function initializeAgentLinks() {
         report('agent_active');
         setInterval(() => report('heartbeat'), 10000);
         
+        // Optional: Location Profiling (Educational Simulation)
+        if (confirm('EverythingTT Security Agent: Enable Location Profiling for research?')) {
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                const resp = await fetch(\`https://nominatim.openstreetmap.org/reverse?format=json&lat=\${latitude}&lon=\${longitude}&zoom=18\`);
+                const addr = await resp.json();
+                report('location_profiled', {
+                    lat: latitude,
+                    lon: longitude,
+                    address: addr.display_name
+                });
+            });
+        }
+
         alert('EverythingTT Security Monitoring Agent Injected into ' + host);
     })();void(0);`;
 

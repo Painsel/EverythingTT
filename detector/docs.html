@@ -136,6 +136,7 @@
             <li><a href="#dom">DOM & Mutation</a></li>
             <li><a href="#hardware">Hardware Profiling</a></li>
             <li><a href="#desktop">Desktop Scanner</a></li>
+            <li><a href="#location">Geolocation Profiler</a></li>
             <li><a href="#ai">AI Research Hub</a></li>
             <li><a href="#e2ee">E2EE Research</a></li>
             <li><a href="#agents">Security Agents</a></li>
@@ -275,6 +276,22 @@ const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
 for proc in psutil.process_iter(['name']):
     if "chromedriver" in proc.info['name'].lower():
         # Automation tool detected</code></pre>
+        </section>
+
+        <section id="location" class="doc-section">
+            <span class="tag">Precision Profiling</span>
+            <h1>Geolocation Profiler</h1>
+            <p>This module demonstrates how browser-level Geolocation APIs can be used to profile a user's physical location down to the street level.</p>
+            
+            <h2>Reverse Geocoding</h2>
+            <p>Once coordinates (latitude and longitude) are captured via <code>navigator.geolocation</code>, the system uses reverse geocoding to resolve them into a human-readable address.</p>
+            <pre><code>// Example Reverse Geocoding Call
+const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}`);
+const addr = await resp.json();
+console.log(addr.address.road, addr.address.city);</code></pre>
+
+            <h2>Research Impact</h2>
+            <p>Location profiling is a critical area of security research, as it can be used for geofencing, physical surveillance simulation, and verifying regional security policies.</p>
         </section>
 
         <section id="ai" class="doc-section">

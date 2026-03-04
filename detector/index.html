@@ -237,6 +237,23 @@
                 <a href="docs.html#hardware" class="card-doc-link">Technical Docs →</a>
             </section>
 
+            <!-- Geolocation Profiler Card -->
+            <section class="card" id="card-geo">
+                <div class="card-header">
+                    <span class="icon">📍</span>
+                    <h3>Geolocation Profiler</h3>
+                </div>
+                <div class="status" id="status-geo">Waiting...</div>
+                <div class="description">
+                    <p style="margin-bottom:0.75rem;">Simulates precision location profiling using browser Geolocation and Reverse Geocoding.</p>
+                    <button onclick="requestGeoLocation()" style="width:100%; padding:0.5rem; background:var(--primary-color); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem; margin-bottom:1rem;">🛰️ Request Precise Location</button>
+                    <ul class="info-list" id="geo-info-list" style="display:none;">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+                <a href="docs.html#location" class="card-doc-link">Technical Docs →</a>
+            </section>
+
             <section class="card" id="card-desktop-scan">
                 <div class="card-header">
                     <span class="icon">🖥️</span>
