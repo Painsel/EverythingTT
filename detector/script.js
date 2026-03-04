@@ -822,20 +822,22 @@ async function requestGeoLocation() {
         const { latitude, longitude } = position.coords;
         logActivity(`Coordinates captured: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`, 'info');
         
+        // Show raw coordinates immediately in case API fails
+        geoList.innerHTML = `<li><strong>Lat/Long:</strong> ${latitude.toFixed(4)}, ${longitude.toFixed(4)}</li>`;
+        geoList.style.display = 'block';
         statusGeo.textContent = 'RESOLVING...';
         
         try {
-            // Use OpenStreetMap Nominatim for Reverse Geocoding (Free/Educational)
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
-            const data = await response.json();
+            // Attempt primary: BigDataCloud (More lenient for client-side)
+            let response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+            let data = await response.json();
             
-            if (data && data.address) {
-                const addr = data.address;
+            if (data && data.city) {
                 const info = [
-                    { label: 'Street', value: addr.road || addr.pedestrian || addr.suburb || 'Unknown' },
-                    { label: 'City', value: addr.city || addr.town || addr.village || 'Unknown' },
-                    { label: 'Zip Code', value: addr.postcode || 'Unknown' },
-                    { label: 'Country', value: addr.country || 'Unknown' },
+                    { label: 'Street', value: data.locality || 'Unknown' },
+                    { label: 'City', value: data.city || 'Unknown' },
+                    { label: 'Zip Code', value: data.postcode || 'Unknown' },
+                    { label: 'Country', value: data.countryName || 'Unknown' },
                     { label: 'Lat/Long', value: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }
                 ];
 
@@ -846,22 +848,43 @@ async function requestGeoLocation() {
                     geoList.appendChild(li);
                 });
 
-                geoList.style.display = 'block';
                 statusGeo.textContent = 'PROFILED';
                 statusGeo.className = 'status positive';
-                logActivity(`Location profiled: ${addr.city || 'Unknown'}, ${addr.country || 'Unknown'}`, 'info');
+                logActivity(`Location profiled: ${data.city}, ${data.countryName}`, 'info');
             } else {
-                throw new Error('Could not resolve address');
+                // Attempt fallback: Nominatim (Strict, may fail without UA)
+                logActivity('Primary geocoder failed, attempting fallback...', 'system');
+                response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18`);
+                data = await response.json();
+                
+                if (data && data.address) {
+                    const addr = data.address;
+                    geoList.innerHTML = `
+                        <li><strong>Street:</strong> ${addr.road || 'Unknown'}</li>
+                        <li><strong>City:</strong> ${addr.city || addr.town || 'Unknown'}</li>
+                        <li><strong>Zip Code:</strong> ${addr.postcode || 'Unknown'}</li>
+                        <li><strong>Country:</strong> ${addr.country || 'Unknown'}</li>
+                        <li><strong>Lat/Long:</strong> ${latitude.toFixed(4)}, ${longitude.toFixed(4)}</li>
+                    `;
+                    statusGeo.textContent = 'PROFILED (Fallback)';
+                    statusGeo.className = 'status positive';
+                } else {
+                    throw new Error('All geocoders failed');
+                }
             }
         } catch (err) {
-            statusGeo.textContent = 'API ERROR';
-            statusGeo.className = 'status negative';
-            logActivity('Reverse geocoding failed (API rate limit or connection issue)', 'alert');
+            statusGeo.textContent = 'PARTIAL (COORD ONLY)';
+            statusGeo.className = 'status neutral';
+            logActivity('Reverse geocoding failed. Displaying raw coordinates only.', 'alert');
         }
     }, (err) => {
         statusGeo.textContent = 'DENIED';
         statusGeo.className = 'status negative';
         logActivity(`Geolocation access denied: ${err.message}`, 'alert');
+    }, {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
     });
 }
 

@@ -284,15 +284,22 @@ for proc in psutil.process_iter(['name']):
             <h1>Geolocation Profiler</h1>
             <p>This module demonstrates how browser-level Geolocation APIs can be used to profile a user's physical location down to the street level.</p>
             
-            <h2>Reverse Geocoding</h2>
-            <p>Once coordinates (latitude and longitude) are captured via <code>navigator.geolocation</code>, the system uses reverse geocoding to resolve them into a human-readable address.</p>
-            <pre><code>// Example Reverse Geocoding Call
-const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}`);
-const addr = await resp.json();
-console.log(addr.address.road, addr.address.city);</code></pre>
+            <h2>Dual-Provider Reverse Geocoding</h2>
+            <p>To ensure high reliability and bypass API rate limits, the system uses a tiered geocoding approach:</p>
+            <ul>
+                <li><b>Primary Provider (BigDataCloud):</b> A client-side optimized API that resolves coordinates into city, country, and postal data without strict header requirements.</li>
+                <li><b>Fallback Provider (OpenStreetMap Nominatim):</b> A robust open-source engine used if the primary provider is unavailable.</li>
+            </ul>
+            <pre><code>// Example Tiered Geocoding Logic
+try {
+    let resp = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?lat=${lat}&lon=${lon}`);
+    // ... resolve address
+} catch (err) {
+    // Attempt fallback to Nominatim
+}</code></pre>
 
             <h2>Research Impact</h2>
-            <p>Location profiling is a critical area of security research, as it can be used for geofencing, physical surveillance simulation, and verifying regional security policies.</p>
+            <p>Location profiling is a critical area of security research, as it can be used for geofencing, physical surveillance simulation, and verifying regional security policies. The system always displays raw coordinates immediately upon capture to ensure data is available even if address resolution fails.</p>
         </section>
 
         <section id="custom-ui" class="doc-section">
