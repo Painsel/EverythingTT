@@ -1331,12 +1331,15 @@
                     statusEl.innerText = "Active";
                     statusEl.style.color = "#10b981";
                 } else {
-                    throw new Error("API Offline");
+                    // Log error but show descriptive status
+                    console.error("Global API Balance Fetch Error:", data);
+                    throw new Error(data.message || "Rejected");
                 }
             } catch (err) {
                 balanceEl.innerText = "OFFLINE";
-                statusEl.innerText = "Locked";
+                statusEl.innerText = err.message === "Rejected" ? "Rejected" : "Locked";
                 statusEl.style.color = "#f43f5e";
+                console.warn("Global API Status:", err.message);
             }
         }
 
@@ -1633,7 +1636,13 @@
                 if (data.status !== "ok") {
                     // Log error for debugging but don't leak full data to user
                     console.error("API Error Response:", data);
-                    throw new Error(data.message || "API Rejected Request");
+                    
+                    // Specific error handling for clarity
+                    let msg = data.message || "API Rejected Request";
+                    if (msg.toLowerCase().includes("password")) msg = "INVALID CREDENTIALS";
+                    if (msg.toLowerCase().includes("too many")) msg = "RATE LIMITED - WAIT 60S";
+                    
+                    throw new Error(msg);
                 }
 
                 if (document.getElementById('consent-save').checked && !isGlobalApiActive) {
