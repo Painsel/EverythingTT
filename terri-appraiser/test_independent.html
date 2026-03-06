@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EverythingTT Public API Verification</title>
+    <style>
+        body { font-family: sans-serif; background: #020617; color: #f8fafc; padding: 2rem; }
+        .card { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 1rem; }
+        pre { background: #020617; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.875rem; color: #94a3b8; }
+        .status { color: #10b981; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>EverythingTT Public API Verification</h1>
+    <div class="card">
+        <p>This is an independent file testing the public access of EverythingTT-v1-preview.</p>
+        <p>Status: <span id="api-status" class="status">Checking...</span></p>
+        <h3>Engine Response:</h3>
+        <pre id="response-output">Waiting for request...</pre>
+    </div>
+
+    <script>
+        // PUBLIC ENDPOINT (Update this if Ngrok URL changes)
+        const ENDPOINT = "https://kecia-ungreeted-neologically.ngrok-free.dev/v1/chat/completions";
+
+        async function verifyApi() {
+            const output = document.getElementById('response-output');
+            const status = document.getElementById('api-status');
+
+            try {
+                const res = await fetch(ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'painsel/EverythingTT-v1-preview',
+                        messages: [{ role: 'user', content: 'Independent file verification: Analyze account 2mQnt risk.' }],
+                        temperature: 0.5
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    status.innerText = "ONLINE (Public Access Verified)";
+                    output.innerText = data.choices[0].message.content;
+                } else {
+                    status.innerText = "ERROR";
+                    status.style.color = "#f43f5e";
+                    output.innerText = JSON.stringify(data, null, 2);
+                }
+            } catch (err) {
+                status.innerText = "NETWORK ERROR (Server Offline)";
+                status.style.color = "#f43f5e";
+                output.innerText = "Could not connect to: " + ENDPOINT;
+            }
+        }
+
+        verifyApi();
+    </script>
+</body>
+</html>
