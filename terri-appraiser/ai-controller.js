@@ -6,21 +6,23 @@
  */
 
 const AI_CONFIG = {
-    // Upgrading to Llama 3.3 70B for significantly better reasoning and market analysis
-    model: "meta-llama/Llama-3.3-70B-Instruct", 
-    endpoint: "https://router.huggingface.co/v1/chat/completions",
+    // Branded EverythingTT-v1-preview Endpoint (Local -> Ngrok Ephemeral)
+    model: "painsel/EverythingTT-v1-preview", 
+    endpoint: "https://kecia-ungreeted-neologically.ngrok-free.dev/v1/chat/completions",
+    // Fallback to Global Brain if local is offline
+    fallbackEndpoint: "https://router.huggingface.co/v1/chat/completions",
     // Dynamic Token Management via JSONBin (prevents hardcoded secrets)
     keySource: "https://api.jsonbin.io/v3/b/69a6011aae596e708f58e218",
     token: "" // Loaded dynamically from keySource
 };
 
 const APPRAISER_SYSTEM_PROMPT = `
-You are the **Territorial Appraiser AI (Painsel Engine v6.0 - Deep Reasoning)**. 
+You are the **EverythingTT-v1-preview (by painsel)**. 
 
 ### CORE DIRECTIVE:
 You are an advanced analytical engine designed to bridge the gap between **territorial.io**'s low-level "Thick Client" code and the high-level economy documented in the **Wiki**. Your analysis must be clinical, high-fidelity, and authoritative.
 
-### 1. TERRI-APPRAISER TOOL KNOWLEDGE (THIS INTERFACE):
+### 1. EVERYTHINGTT-V1-PREVIEW (BY PAINSEL) KNOWLEDGE:
 - **PURPOSE**: A community-driven real-time account appraisal and market exchange tool.
 - **VALUATION METHODOLOGY**:
     - **Gold**: $1.99 per 1,000 Gold.
@@ -54,10 +56,10 @@ You MUST provide your internal reasoning inside \`<thought>\` tags using these s
 - **[EXTRACTING_DATA]**: Parse scan results, user intent, or specific account metrics.
 - **[ENGINE_SIMULATION]**: Analyze source-code verified mechanics (Interest, Purge, Expansion logic).
 - **[WIKI_VALIDATION]**: Cross-reference against official game documentation (Decay, Titles, Clan mechanics).
-- **[ECONOMIC_SYNTHESIS]**: Calculate USD worth, liquidity risks, and formulate strategic market advice using Terri-Appraiser methodology.
+- **[ECONOMIC_SYNTHESIS]**: Calculate USD worth, liquidity risks, and formulate strategic market advice using EverythingTT methodology.
 
 ### 5. ARCHITECTURAL BOUNDARY:
-- **Appraiser Tool**: \`https://painsel.github.io/EverythingTT/terri-appraiser/\` (Community analytical layer).
+- **EverythingTT Appraiser**: \`https://painsel.github.io/EverythingTT/terri-appraiser/\` (Community analytical layer).
 - **Official Game**: \`https://territorial.io/\` (The underlying infrastructure).
 
 ### 6. RESPONSE FORMAT:
@@ -191,7 +193,7 @@ const AI = {
         }
 
         if (sender === "AI") {
-            msgDiv.innerHTML = `<span class="bubble-label label-ai">Appraiser AI</span><div class="ai-response-container"></div>`;
+            msgDiv.innerHTML = `<span class="bubble-label label-ai">EverythingTT-v1-preview</span><div class="ai-response-container"></div>`;
             container.appendChild(msgDiv);
             const responseContainer = msgDiv.querySelector('.ai-response-container');
             
@@ -437,18 +439,21 @@ const AI = {
 
             while (retryCount <= maxRetries) {
                 try {
-                    response = await fetch(AI_CONFIG.endpoint, {
+                    // Try the branded endpoint first, then the fallback if needed
+                    const currentEndpoint = (retryCount === 0) ? AI_CONFIG.endpoint : AI_CONFIG.fallbackEndpoint;
+                    
+                    response = await fetch(currentEndpoint, {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${AI_CONFIG.token}`
                         },
                         body: JSON.stringify({
-                            model: AI_CONFIG.model,
+                            model: (currentEndpoint === AI_CONFIG.endpoint) ? AI_CONFIG.model : "meta-llama/Llama-3.3-70B-Instruct",
                             messages: requestMessages,
-                            max_tokens: 800, // INCREASED further for 70B depth
-                            temperature: 0.6, // Slightly lower for more precision
-                            top_p: 0.9 // Added for better diversity in high-prestige responses
+                            max_tokens: 800,
+                            temperature: 0.5,
+                            top_p: 0.95
                         })
                     });
 
@@ -459,6 +464,12 @@ const AI = {
                     }
 
                     if (!response.ok) {
+                        // If the local branded endpoint fails, force a retry on the fallback
+                        if (currentEndpoint === AI_CONFIG.endpoint) {
+                            console.warn("Branded endpoint failed. Attempting fallback...");
+                            retryCount++;
+                            continue;
+                        }
                         const errorData = await response.json().catch(() => ({}));
                         throw new Error(errorData.error?.message || `HTTP ${response.status}`);
                     }
