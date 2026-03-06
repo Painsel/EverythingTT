@@ -191,6 +191,24 @@ const response = await fetch('https://kecia-ungreeted-neologically.ngrok-free.de
 
 const data = await response.json();
 console.log(data.choices[0].message.content);</pre>
+
+            <h3>JavaScript (Browser)</h3>
+            <pre>
+const prompt = "Analyze account market liquidity.";
+const endpoint = "https://kecia-ungreeted-neologically.ngrok-free.dev/v1/chat/completions";
+
+fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        model: 'painsel/EverythingTT-v1-preview',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.5
+    })
+})
+.then(res => res.json())
+.then(data => console.log("EverythingTT Analysis:", data.choices[0].message.content))
+.catch(err => console.error("API Error:", err));</pre>
         </section>
 
         <!-- Section 5: API Test Console -->
