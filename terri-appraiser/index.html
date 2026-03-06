@@ -568,44 +568,75 @@
             
             try {
                 btn.disabled = true;
-                btn.innerHTML = '<span class="animate-pulse">PUBLISHING...</span>';
+                btn.innerHTML = '<span class="animate-pulse">SCRUBBING & UPLOADING...</span>';
                 
                 // 1. Get current page HTML (clone to strip sensitive/unnecessary parts)
                 const clone = document.documentElement.cloneNode(true);
                 
-                // Security Scrubbing: Strip credentials and private UI before upload
-                const userField = clone.querySelector('#api-username');
-                const passField = clone.querySelector('#api-password');
-                if (userField) userField.value = '';
-                if (passField) passField.value = '';
-
-                // Obfuscate Global API credentials in the published report
-                const scripts = clone.querySelectorAll('script');
-                scripts.forEach(s => {
-                    if (s.textContent.includes('GLOBAL_API')) {
-                        s.textContent = s.textContent.replace(/atob\(".*?"\)/g, '""');
+                // --- ROBUST SECURITY SCRUBBING ---
+                
+                // Remove all script tags that might contain sensitive logic or API keys
+                clone.querySelectorAll('script').forEach(s => {
+                    // Only keep scripts that are absolutely necessary for the static report display
+                    // if any. For a report, we mostly want the static HTML/CSS.
+                    if (!s.src.includes('cdn.tailwindcss.com') && !s.textContent.includes('UI.showDebug')) {
+                        s.remove();
                     }
                 });
-                
-                // Remove interactive credential management UI for the static report
-                const accountAccess = clone.querySelector('.input-group');
-                if (accountAccess) accountAccess.remove();
 
-                // Remove correction mode button and any visible inputs from the report
+                // Clear all input values
+                clone.querySelectorAll('input').forEach(input => {
+                    if (input.type === 'password' || input.type === 'text') {
+                        input.value = '';
+                        input.setAttribute('value', '');
+                    }
+                });
+
+                // Remove the entire credential management and input sections
+                const sensitiveSections = [
+                    '#personal-api-fields',
+                    '#global-api-banner',
+                    '#fetch-btn',
+                    '#import-config',
+                    '.col-calculator', // Remove the calculator to focus on the report
+                    '#aiChatModal',
+                    '#helpModal',
+                    '#debugOverlay',
+                    '#shareOverlay',
+                    '.absolute' // Remove floating help buttons
+                ];
+                sensitiveSections.forEach(selector => {
+                    const el = clone.querySelector(selector);
+                    if (el) el.remove();
+                });
+
+                // Remove correction UI
                 const correctionBtn = clone.querySelector('#correction-mode-btn');
                 if (correctionBtn) correctionBtn.remove();
                 clone.querySelectorAll('[id^="edit-"]').forEach(el => el.remove());
 
-                // PageDrop Cleanup: Remove existing PageDrop widgets if republishing
-                const existingFab = clone.querySelector('#pagedrop-fab-container');
-                const existingExpiry = clone.querySelector('#pagedrop-expiry-popup');
-                const existingFabCss = clone.querySelector('link[href*="pagedrop.io/fab-widget.css"]');
-                const existingFabJs = clone.querySelector('script[src*="pagedrop.io/fab-widget.js"]');
-                if (existingFab) existingFab.remove();
-                if (existingExpiry) existingExpiry.remove();
-                if (existingFabCss) existingFabCss.remove();
-                if (existingFabJs) existingFabJs.remove();
+                // Ensure the report is centered and looks good standalone
+                const container = clone.querySelector('.container');
+                if (container) {
+                    container.style.maxWidth = '800px';
+                    container.style.margin = '0 auto';
+                }
                 
+                // Simplify the grid for the report
+                const grid = clone.querySelector('.grid');
+                if (grid) {
+                    grid.style.display = 'block';
+                    const reportCol = clone.querySelector('.col-appraisal');
+                    if (reportCol) {
+                        reportCol.style.gridColumn = 'span 12';
+                        reportCol.style.marginBottom = '2rem';
+                    }
+                    const assetsCol = clone.querySelector('.col-assets');
+                    if (assetsCol) {
+                        assetsCol.style.gridColumn = 'span 12';
+                    }
+                }
+
                 const htmlContent = '<!DOCTYPE html>\n' + clone.outerHTML;
 
                 // 2. Attempt PageDrop Public API Upload
@@ -617,7 +648,7 @@
                             html: htmlContent,
                             ttl: '3d',
                             visibility: 'private',
-                            fileName: 'territorial-appraisal.html'
+                            fileName: `territorial-appraisal-${Date.now()}.html`
                         })
                     });
 
@@ -638,14 +669,14 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'territorial-report.html';
+                a.download = `territorial-report-${document.getElementById('res-user').innerText}.html`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 
                 UI.showToast("API BLOCKED: REPORT DOWNLOADED");
-                alert("PageDrop API blocked this browser request.\n\nYour report has been downloaded. You can manually upload it to pagedrop.io.\n\nTIP: Use a VPN to bypass API blocks!");
+                alert("PageDrop API blocked this browser request.\n\nYour report has been downloaded. You can manually upload it to pagedrop.io.");
 
             } catch (err) {
                 console.error("PageDrop Error:", err);
@@ -669,6 +700,57 @@
         });
 
         /**
+         * CORRECTION MODE & MANUAL OVERRIDE
+         * Allows users to manually adjust scan results for edge-case appraisal scenarios.
+         */
+        let isCorrectionMode = false;
+        document.getElementById('correction-mode-btn').addEventListener('click', () => {
+            isCorrectionMode = !isCorrectionMode;
+            const btn = document.getElementById('correction-mode-btn');
+            const displayElements = ['res-gold', 'res-clan-rank', 'res-leader-pts', 'res-gold-rank-val', 'res-admin-rank'];
+            const editElements = ['edit-gold', 'edit-clan-rank', 'edit-leader-pts', 'edit-gold-rank', 'edit-admin-rank'];
+            
+            if (isCorrectionMode) {
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Save Changes';
+                btn.style.backgroundColor = 'var(--success)';
+                btn.style.color = 'white';
+                
+                displayElements.forEach(id => document.getElementById(id).classList.add('hidden'));
+                editElements.forEach(id => {
+                    const el = document.getElementById(id);
+                    el.classList.remove('hidden');
+                    // Initialize with current values
+                    const displayVal = document.getElementById(id.replace('edit-', id.startsWith('edit-gold-rank') ? 'res-gold-rank-val' : (id === 'edit-gold' ? 'res-gold' : 'res-'))).innerText.replace(/[^0-9.-]/g, '');
+                    el.value = displayVal;
+                });
+            } else {
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Correction Mode';
+                btn.style.backgroundColor = '';
+                btn.style.color = '';
+                
+                // Save values back to display and re-calculate
+                const gold = parseFloat(document.getElementById('edit-gold').value) || 0;
+                const clanRank = parseInt(document.getElementById('edit-clan-rank').value) || 0;
+                const leaderPts = parseInt(document.getElementById('edit-leader-pts').value) || 0;
+                const goldRank = parseInt(document.getElementById('edit-gold-rank').value) || 0;
+                const adminRank = parseInt(document.getElementById('edit-admin-rank').value) || 0;
+                
+                document.getElementById('res-gold').innerText = formatNumber(gold);
+                document.getElementById('res-clan-rank').innerText = "#" + clanRank;
+                document.getElementById('res-leader-pts').innerText = formatNumber(leaderPts);
+                document.getElementById('res-gold-rank-val').innerText = "#" + goldRank;
+                document.getElementById('res-admin-rank').innerText = "#" + adminRank;
+                
+                displayElements.forEach(id => document.getElementById(id).classList.remove('hidden'));
+                editElements.forEach(id => document.getElementById(id).classList.add('hidden'));
+                
+                // Re-calculate appraisal based on new values
+                runAppraisal(document.getElementById('res-user').innerText);
+                UI.showToast("CHANGES APPLIED");
+            }
+        });
+
+        /**
          * DATA PERSISTENCE (LocalStorage & JSON)
          * 
          * Manages secure local storage of user credentials and JSON-based configuration management.
@@ -682,6 +764,44 @@
         function saveToLocalStorage(username, password) {
             const data = { username, password, timestamp: new Date().toISOString() };
             localStorage.setItem('territorial_creds', JSON.stringify(data));
+        }
+
+        /**
+         * Loads saved credentials from localStorage
+         * @returns {boolean} True if data was found and loaded
+         */
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('territorial_creds');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.username) document.getElementById('api-username').value = data.username;
+                    if (data.password) document.getElementById('api-password').value = data.password;
+                    document.getElementById('consent-save').checked = true;
+                    return true;
+                } catch (e) {
+                    localStorage.removeItem('territorial_creds');
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Exports credentials as a downloadable JSON file
+         * @param {string} username 
+         * @param {string} password 
+         */
+        function downloadCredentials(username, password) {
+            const data = { username, password, timestamp: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'territorial_credentials.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         /**

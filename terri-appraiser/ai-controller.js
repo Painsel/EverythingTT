@@ -18,34 +18,35 @@ const APPRAISER_SYSTEM_PROMPT = `
 You are the **Territorial Appraiser AI (Painsel Engine v6.0 - Deep Reasoning)**. 
 
 ### CORE DIRECTIVE:
-You are an advanced analytical engine designed to bridge the gap between **territorial.io**'s low-level "Thick Client" code and the high-level economy documented in the **Wiki**.
+You are an advanced analytical engine designed to bridge the gap between **territorial.io**'s low-level "Thick Client" code and the high-level economy documented in the **Wiki**. Your analysis must be clinical, high-fidelity, and authoritative.
 
 ### 1. ENGINE-LEVEL INTELLIGENCE (SOURCE CODE):
-- **THICK CLIENT**: David Tschacher's engine is a monolithic JavaScript application using a single \`<canvas>\`. You understand its rendering pipeline and WebSocket communication.
-- **INTEREST CALCULATION**: Resources grow based on land mass and current balance. You model this as an exponential growth curve limited by game-tick updates.
-- **PURGE LOGIC**: The "8-Day Purge" is a hard-coded garbage collection for 0-gold accounts. 
-- **SOCIAL COSTS**: Lobby interaction (@mentions) is a deflationary gold sink (0.10 gold/mention).
+- **THICK CLIENT**: David Tschacher's engine is a monolithic JavaScript application using a single \`<canvas id="canvasA">\`. It bypasses standard HTML UI for a direct 2D Canvas API rendering pipeline.
+- **INTEREST CALCULATION**: Resources grow based on land mass and current balance. Interest follows an exponential growth curve limited by game-tick updates.
+- **PURGE LOGIC**: The "8-Day Purge" is a hard-coded garbage collection. Accounts with 0 gold are flagged and deleted after 8 days of inactivity.
+- **SOCIAL COSTS**: Lobby interaction (@mentions) is a deflationary gold sink costing 0.10 gold per player mentioned.
 
 ### 2. WIKI-VERIFIED ECONOMIC DATA:
-- **GOLD DECAY**: Nightly deduction ranges from 0.50 gold up to 0.01% of total reserves. 
-- **TITLES**: You know all 12 wealth tiers from **Beggar** to **Richest Player** and the 3 bank tiers.
-- **CLANS**: You understand the 1-7 character tag constraints and the "Primary Clan" point-based election mechanics.
+- **GOLD DECAY**: Nightly deduction ranges from 0.50 gold up to 0.01% of total reserves. Top 90 players have slightly lower decay rates (0.001%-0.0099%).
+- **TITLES**: 12 wealth tiers from **Beggar** (<3 gold) to **Capitalist** (>=30k gold) and **Richest Player**.
+- **CLANS**: 1-7 character tag constraints. "Primary Clan" points determine leadership and political power in elections.
 
 ### 3. THINKING MODE PROTOCOL (STEP-BY-STEP):
 You MUST provide your internal reasoning inside \`<thought>\` tags using these specific labels:
-- **[EXTRACTING_DATA]**: Parse scan results or user intent.
-- **[ENGINE_SIMULATION]**: Analyze source-code verified mechanics (Interest, Purge, Costs).
-- **[WIKI_VALIDATION]**: Cross-reference against official game documentation (Decay, Titles).
-- **[ECONOMIC_SYNTHESIS]**: Calculate worth and formulate strategic advice.
+- **[EXTRACTING_DATA]**: Parse scan results, user intent, or specific account metrics.
+- **[ENGINE_SIMULATION]**: Analyze source-code verified mechanics (Interest, Purge, Expansion logic).
+- **[WIKI_VALIDATION]**: Cross-reference against official game documentation (Decay, Titles, Clan mechanics).
+- **[ECONOMIC_SYNTHESIS]**: Calculate USD worth, liquidity risks, and formulate strategic market advice.
 
 ### 4. ARCHITECTURAL BOUNDARY:
-- **Appraiser Tool**: \`https://painsel.github.io/EverythingTT/terri-appraiser/\` (You are here).
-- **Official Game**: \`https://territorial.io/\` (External source).
+- **Appraiser Tool**: \`https://painsel.github.io/EverythingTT/terri-appraiser/\` (Community analytical layer).
+- **Official Game**: \`https://territorial.io/\` (The underlying infrastructure).
 
 ### 5. RESPONSE FORMAT:
 - Start with the step-by-step reasoning in \`<thought>\` tags.
 - Follow with a **Markdown-formatted** definitive response.
-- Tone: Clinical, high-fidelity, and authoritative.
+- Use tables for data density and bolding for emphasis.
+- Always recommend verifying trades at the official Discord: https://discord.gg/DGTMnG9avc
 `;
 
 const AI = {
@@ -237,48 +238,93 @@ const AI = {
         return new Promise((resolve) => {
             let i = 0;
             const words = text.split(' ');
-            const interval = setInterval(() => {
+            
+            const stream = () => {
                 if (i < words.length) {
                     const partialText = words.slice(0, i + 1).join(' ');
                     element.innerHTML = this.parseMarkdown(partialText);
                     this.scrollToBottom();
                     i++;
+                    setTimeout(() => requestAnimationFrame(stream), speed / 2);
                 } else {
-                    clearInterval(interval);
                     element.innerHTML = this.parseMarkdown(text);
                     this.scrollToBottom();
                     resolve();
                 }
-            }, speed);
+            };
+            
+            requestAnimationFrame(stream);
         });
     },
 
     /**
-     * Enhanced Markdown-lite parser
+     * Enhanced Markdown-lite parser for data density
      */
     parseMarkdown(text) {
-        return text
+        let html = text
             // Reasoning Steps: [LABEL]
             .replace(/\[([A-Z_]+)\]/g, '<div class="ai-thought-step"><span class="step-pulse"></span>$1</div>')
             // Headers: ### Title
-            .replace(/^### (.*$)/gim, '<h4 class="text-indigo-400 font-bold mt-2 mb-1">$1</h4>')
+            .replace(/^### (.*$)/gim, '<h4 class="text-indigo-400 font-bold mt-4 mb-2">$1</h4>')
             // Bold: **text**
-            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-black">$1</strong>')
             // Italic: *text*
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            // Lists: lines starting with - or *
-            .split('\n').map(line => {
-                const trimmed = line.trim();
-                if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-                    return `<li class="ml-4 list-disc text-slate-300">${trimmed.substring(2)}</li>`;
+            // Inline Code: `text`
+            .replace(/`(.*?)`/g, '<code class="bg-slate-900/50 px-1.5 py-0.5 rounded border border-white/5 text-indigo-300 font-mono text-[10px]">$1</code>')
+            // Links: [text](url)
+            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="text-indigo-400 underline hover:text-white transition-colors">$1</a>');
+
+        // Table Handling (Simple 2-column support for data density)
+        if (html.includes('|')) {
+            const lines = html.split('\n');
+            let inTable = false;
+            html = lines.map(line => {
+                if (line.includes('|') && line.trim().startsWith('|')) {
+                    const cells = line.split('|').filter(c => c.trim().length > 0);
+                    const row = cells.map(c => `<td class="border border-white/5 p-2 text-[10px] text-slate-300">${c.trim()}</td>`).join('');
+                    if (!inTable) {
+                        inTable = true;
+                        return `<table class="w-full border-collapse border border-white/5 my-3 bg-slate-900/20"><tr>${row}</tr>`;
+                    }
+                    return `<tr>${row}</tr>`;
+                } else {
+                    if (inTable) {
+                        inTable = false;
+                        return `</table>${line}`;
+                    }
+                    return line;
                 }
-                if (trimmed.length === 0) return '<br>';
-                // If it's a header or already wrapped, don't wrap in <p>
-                if (trimmed.startsWith('<h4') || trimmed.startsWith('<li')) return trimmed;
-                return `<p class="mb-2">${trimmed}</p>`;
-            }).join('')
-            // Group <li> into <ul>
-            .replace(/(<li.*?>.*?<\/li>)+/g, '<ul class="my-2">$1</ul>');
+            }).join('\n');
+            if (inTable) html += '</table>';
+        }
+
+        // List Handling
+        const lines = html.split('\n');
+        let inList = false;
+        html = lines.map(line => {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                const item = `<li class="ml-4 list-disc text-slate-300 mb-1">${trimmed.substring(2)}</li>`;
+                if (!inList) {
+                    inList = true;
+                    return `<ul class="my-3 space-y-1">${item}`;
+                }
+                return item;
+            } else {
+                if (inList) {
+                    inList = false;
+                    return `</ul>${trimmed.length > 0 ? `<p class="mb-3 leading-relaxed">${trimmed}</p>` : ''}`;
+                }
+                if (trimmed.length === 0) return '<div class="h-2"></div>';
+                if (trimmed.startsWith('<h4') || trimmed.startsWith('<div') || trimmed.startsWith('<table')) return trimmed;
+                return `<p class="mb-3 leading-relaxed">${trimmed}</p>`;
+            }
+        }).join('');
+
+        if (inList) html += '</ul>';
+        
+        return html;
     },
 
     scrollToBottom() {
@@ -332,16 +378,19 @@ const AI = {
                 }
             }
 
-            let liveContext = "";
+            let liveContext = null;
             const currentWorth = document.getElementById('res-val').innerText;
             if (currentWorth !== "$0.00") {
-                const user = document.getElementById('res-user').innerText;
-                const gold = document.getElementById('res-gold').innerText;
-                const clanRank = document.getElementById('res-clan-rank').innerText;
-                const goldRank = document.getElementById('res-gold-rank-val').innerText;
-                const leaderPts = document.getElementById('res-leader-pts').innerText;
-                
-                liveContext = `[CURRENT SCAN CONTEXT: User "${user}", Worth ${currentWorth}, Gold ${gold}, Clan Rank ${clanRank}, Gold Rank ${goldRank}, Leader Pts ${leaderPts}] `;
+                liveContext = {
+                    user: document.getElementById('res-user').innerText,
+                    worth: currentWorth,
+                    gold: document.getElementById('res-gold').innerText,
+                    clanRank: document.getElementById('res-clan-rank').innerText,
+                    goldRank: document.getElementById('res-gold-rank-val').innerText,
+                    leaderPts: document.getElementById('res-leader-pts').innerText,
+                    adminRank: document.getElementById('res-admin-rank').innerText,
+                    nameBonus: document.getElementById('res-name-bonus').innerText
+                };
             }
 
             // Build request payload with history and context
@@ -349,10 +398,16 @@ const AI = {
                 { role: "system", content: APPRAISER_SYSTEM_PROMPT }
             ];
             
-            // Add live context as a separate user message or hidden prompt for better model attention
+            // Add live context as a structured system notification
             if (liveContext) {
-                requestMessages.push({ role: "user", content: `[SYSTEM NOTIFICATION: The user is currently looking at this account data: ${liveContext}. Use this for the next response if relevant.]` });
-                requestMessages.push({ role: "assistant", content: "Understood. I have the account data in my buffer and will use it for analysis." });
+                requestMessages.push({ 
+                    role: "user", 
+                    content: `[SYSTEM_DATA_INJECTION] The current app state contains the following scan data: ${JSON.stringify(liveContext)}. Use this data to provide high-fidelity analysis if the user's query relates to the current account.` 
+                });
+                requestMessages.push({ 
+                    role: "assistant", 
+                    content: "<thought>[EXTRACTING_DATA] Account data successfully injected into buffer. Ready for clinical synthesis.</thought>Data received. I'm ready to analyze this account's market position." 
+                });
             }
 
             // Add existing history to the prompt for context
