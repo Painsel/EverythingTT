@@ -163,8 +163,8 @@ def status():
         "model": "painsel/EverythingTT-v1-preview",
         "version": "1.0.0-preview",
         "token_synced": token_ok,
-        "public_access": False,
-        "auth_requirement": "Custom API Key (ETT Tokens)"
+        "public_access": True,
+        "auth_requirement": "EverythingTT API Key (Managed via Identity)"
     }), 200
 
 @app.route('/v1/chat/completions', methods=['POST'])
