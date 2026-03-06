@@ -330,12 +330,14 @@
         <div class="sidebar-section">
             <span class="sidebar-label">Identity assigned</span>
             <div id="auth-forms">
-                <input type="text" id="username" placeholder="Username" class="auth-input">
-                <input type="password" id="password" placeholder="Password" class="auth-input">
-                <div class="flex gap-2">
-                    <button onclick="Auth.register()" class="sidebar-btn btn-ghost" style="flex: 1;">Assign</button>
-                    <button onclick="Auth.login()" class="sidebar-btn btn-solid" style="flex: 1;">Access</button>
-                </div>
+                <form id="identity-form" onsubmit="event.preventDefault();">
+                    <input type="text" id="username" name="username" autocomplete="username" placeholder="Username" class="auth-input">
+                    <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Password" class="auth-input">
+                    <div class="flex gap-2">
+                        <button type="button" onclick="Auth.register()" class="sidebar-btn btn-ghost" style="flex: 1;">Assign</button>
+                        <button type="button" onclick="Auth.login()" class="sidebar-btn btn-solid" style="flex: 1;">Access</button>
+                    </div>
+                </form>
             </div>
             <div id="user-profile" class="hidden">
                 <h4 id="display-username" class="text-white font-bold text-lg mb-1">---</h4>
@@ -420,6 +422,8 @@
         const Auth = {
             currentUser: null,
             activeKey: null,
+            // Use Ngrok if available, else localhost
+            baseUrl: "https://kecia-ungreeted-neologically.ngrok-free.dev",
 
             async register() {
                 const u = document.getElementById('username').value;
@@ -427,7 +431,7 @@
                 if (!u || !p) return alert("Credentials required.");
 
                 try {
-                    const res = await fetch('http://localhost:5000/auth/register', {
+                    const res = await fetch(`${this.baseUrl}/auth/register`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username: u, password: p })
@@ -436,9 +440,9 @@
                     if (data.success) {
                         alert("Identity assigned. You may now access.");
                     } else {
-                        alert(data.error);
+                        alert(`Error: ${data.error || 'Registration failed'}`);
                     }
-                } catch (e) { alert("API Offline"); }
+                } catch (e) { alert("API Offline or unreachable"); }
             },
 
             async login() {
@@ -447,7 +451,7 @@
                 if (!u || !p) return alert("Credentials required.");
 
                 try {
-                    const res = await fetch('http://localhost:5000/auth/login', {
+                    const res = await fetch(`${this.baseUrl}/auth/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username: u, password: p })
@@ -457,15 +461,15 @@
                         this.currentUser = { username: u, password: p, balance: data.balance, keys: data.keys };
                         this.updateUI();
                     } else {
-                        alert(data.error);
+                        alert(`Error: ${data.error || 'Login failed'}`);
                     }
-                } catch (e) { alert("API Offline"); }
+                } catch (e) { alert("API Offline or unreachable"); }
             },
 
             async createKey() {
                 if (!this.currentUser) return;
                 try {
-                    const res = await fetch('http://localhost:5000/auth/create-key', {
+                    const res = await fetch(`${this.baseUrl}/auth/create-key`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username: this.currentUser.username, password: this.currentUser.password })
@@ -475,7 +479,7 @@
                         this.currentUser.keys.push(data.key);
                         this.updateUI();
                     }
-                } catch (e) { alert("API Offline"); }
+                } catch (e) { alert("API Offline or unreachable"); }
             },
 
             updateUI() {
