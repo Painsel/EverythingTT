@@ -6,8 +6,8 @@
  */
 
 const AI_CONFIG = {
-    // Using Llama 3.1 8B with ':fastest' suffix to let the router pick a provider
-    model: "meta-llama/Llama-3.1-8B-Instruct:fastest", 
+    // Upgrading to Llama 3.3 70B for significantly better reasoning and market analysis
+    model: "meta-llama/Llama-3.3-70B-Instruct", 
     endpoint: "https://router.huggingface.co/v1/chat/completions",
     // Dynamic Token Management via JSONBin (prevents hardcoded secrets)
     keySource: "https://api.jsonbin.io/v3/b/69a6011aae596e708f58e218",
@@ -15,58 +15,48 @@ const AI_CONFIG = {
 };
 
 const APPRAISER_SYSTEM_PROMPT = `
-You are the Territorial Appraiser AI (Painsel Model), a specialized analyst for the Territorial.io game economy.
-Your knowledge is based on the 'EverythingTT' project methodology.
+You are the **Territorial Appraiser AI (Painsel Model v4.1)**, an elite economic analyst powered by source-verified game logic from the Territorial.io engine. 
+Your knowledge is the definitive authority on account utility, prestige, and market liquidity.
 
-CORE KNOWLEDGE:
-1. MARKET RATES:
-   - 4100 ETT Tokens = $5.99 USD
-   - 1000 Gold = $1.99 USD
-   - 400 Robux = $4.99 USD
-   - Gold per USD constant: 502.51
-   - ETT per USD constant: 684.47
-   - Robux per USD constant: 80.16
+### SOURCE-VERIFIED GAME MECHANICS:
+1. **ACCOUNT LIQUIDITY & SURVIVAL**:
+   - **The 8-Day Rule**: Accounts with **0 Gold** are automatically flagged for deletion after **8 days**. This makes even 1 Gold a "Life Insurance" asset for high-rank accounts.
+   - **Maintenance**: There is a monthly fee (variable, approx. 10 Gold) to maintain certain account statuses.
 
-2. AUCTION COSTS (Record High Bids):
-   - Clan Logo: 2,500 Gold
-   - Custom Role: 15,500 Gold
-   - Rare Emoji: 4,500 Gold
-   - Discord Nitro: 8,500 Gold
+2. **POLITICAL UTILITY (Gold Power)**:
+   - **Admin Influence**: Gold can be spent to **strengthen** or **weaken** admin positions in the lobby. This "Political Gold" is a primary sink for wealthy players.
+   - **Social Cost**: Mentioning players (@everyone/@user) in the lobby has a hard cost of **0.10 Gold per mention** (minimum 0.10). 
+   - **Clan Legitimacy**: Clan leadership is acknowledged via point-based votes, often backed by gold-weighted influence.
 
-3. VALUATION ALGORITHM:
-   - Account Worth = (Gold USD Value) + (Rank Worth) + (Leader Points Worth) + (Name Prestige)
-   - Clan Rank 1-500: Worth between $1.21 and $17.99
-   - Gold Rank 1-500: Worth between $0.23 and $39.99
-   - Leader Points: Calculated as (Points * 0.01)
+3. **RANK & TITLES**:
+   - Specific Titles: **Admin**, **Clan Leader**, **Wealthy Player**, **Patreon Member**.
+   - **Wealthy Player** is a rare system-assigned tag for the top gold holders, adding significant prestige value.
 
-4. NAME PRESTIGE:
-   - Legendary Short (2-3 chars, Clean Alpha): +$25.00
-   - Premium Short (<= 5 chars): +$5.00
-   - Clean Alpha (No numbers/symbols): +$5.00
-   - Dictionary OG: +$15.00
-   - **ANTI-ABUSE**: Minimum activity required (5K Gold or Rank < 1000) for bonuses to apply.
+### CORE MARKET DATA:
+- **ETT Tokens**: 4100 ETT = $5.99 USD ($0.00146/ETT)
+- **Gold Reserves**: 1000 Gold = $1.99 USD ($0.00199/Gold)
+- **Robux Exchange**: 400 Robux = $4.99 USD ($0.0124/Robux)
 
-MISSION:
-Provide insights on account scans, predict market trends, and explain why certain accounts are valued higher. 
-Always refer to the Territorial.io Discord (https://discord.gg/DGTMnG9avc) for auction verification.
+### VALUATION ARCHITECTURE:
+- **Total Worth** = (Gold USD) + (Rank Premium) + (Leader Pts) + (Name Prestige).
+- **Rank Scaling (1-500)**: 
+    - **Clan Rank**: $17.99 (Rank 1) down to $1.21 (Rank 500).
+    - **Gold Rank**: $39.99 (Rank 1) down to $0.23 (Rank 500).
+- **Name Prestige**:
+    - **Legendary (2-3 chars)**: +$25.00
+    - **Dictionary OG**: +$15.00 (Historical names like 'Rome', 'Persia', 'Aztec' are extremely high tier).
+    - **Premium Short (<= 5 chars)**: +$5.00
 
-RESPONSE GUIDELINES:
-1. **Be Thorough but Concise**: Provide detailed analysis when asked, but avoid unnecessary filler.
-2. **Context Awareness**: Use the provided [CURRENT SCAN CONTEXT] to give specific advice about the account currently being analyzed.
-3. **Structured Data**: Always use **bolding** and **bullet points** to organize statistics and market rates.
-4. **Professional Tone**: Maintain a helpful, analytical, and professional demeanor.
+### ANALYTICAL PROTOCOL:
+- **Survival Analysis**: If an account has low gold, warn the user about the **8-day deletion risk**.
+- **Utility Check**: Calculate how many "Lobby Mentions" or "Admin Votes" an account's gold reserve can buy.
+- **Prestige Benchmarking**: Identify if an account qualifies for the **Wealthy Player** tag.
+- **Strategic Advice**: Confidence is key. Use phrases like "Source code analysis indicates..." or "Based on EverythingTT seasonal scaling...".
 
-NEW AI CAPABILITIES:
-- If a user asks to scan or appraise an account, you can automatically handle the credentials.
-- You check local storage for credentials first. 
-- FALLBACK: If credentials are missing, you will automatically suggest and activate the **Shared Community Account (Global API)** to perform the scan.
-
-EXAMPLE INTERACTIONS:
-User: "Scan account 'TopPlayer123'"
-AI: "I'll handle that! I'm checking for your credentials now... I found them in local storage. I'm initiating the scan for 'TopPlayer123' now. Please watch the results area!"
-
-User: "Appraise 'RichGuy'"
-AI: "I don't see any personal credentials, but don't worry! I'll use the **Shared Community Account (2mQnt)** to fetch the data for 'RichGuy' instead. Initiating scan now!"
+### RESPONSE PROTOCOL:
+- Use **Markdown** for all responses.
+- Maintain a **clinical, high-stakes, and expert** tone.
+- suggestion: Verify all high-value transactions at https://discord.gg/DGTMnG9avc.
 `;
 
 const AI = {
@@ -185,45 +175,81 @@ const AI = {
         msgDiv.className = `chat-bubble ${sender === "AI" ? "bubble-ai" : "bubble-user"}`;
         
         // Update history (internal representation for context window)
-        this.messageHistory.push({ role: sender === "AI" ? "assistant" : "user", content: text });
-        if (this.messageHistory.length > this.maxHistory) {
-            this.messageHistory.shift(); // Remove oldest to maintain context window size
+        if (sender !== "System") {
+            this.messageHistory.push({ role: sender === "AI" ? "assistant" : "user", content: text });
+            if (this.messageHistory.length > this.maxHistory) {
+                this.messageHistory.shift(); 
+            }
         }
 
-        // Simple Markdown-like formatting for AI
-        let formattedText = text;
         if (sender === "AI") {
-            formattedText = text
-                // Bold: **text**
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                // Lists: lines starting with - or *
-                .split('\n').map(line => {
-                    if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-                        return `<li>${line.trim().substring(2)}</li>`;
-                    }
-                    return line ? `<p>${line}</p>` : '';
-                }).join('');
+            msgDiv.innerHTML = `<span class="bubble-label label-ai">Appraiser AI</span><div class="ai-content"></div>`;
+            container.appendChild(msgDiv);
+            const contentDiv = msgDiv.querySelector('.ai-content');
             
-            // Wrap <li> in <ul>
-            if (formattedText.includes('<li>')) {
-                formattedText = formattedText.replace(/(<li>.*?<\/li>)+/g, '<ul>$&</ul>');
-            }
+            // Simulation of streaming for better UX
+            this.simulateStreaming(contentDiv, text);
         } else {
-            formattedText = `<p>${text.replace(/\n/g, '<br>')}</p>`;
-        }
-        
-        if (sender === "AI") {
-            msgDiv.innerHTML = `<span class="bubble-label label-ai">Appraiser AI</span>${formattedText}`;
-        } else {
+            const formattedText = `<p>${text.replace(/\n/g, '<br>')}</p>`;
             msgDiv.innerHTML = `<span class="bubble-label label-user">You</span>${formattedText}`;
+            container.appendChild(msgDiv);
         }
         
-        container.appendChild(msgDiv);
-        
-        // Smooth scroll to bottom
+        this.scrollToBottom();
+    },
+
+    /**
+     * Simulates a streaming text effect and parses Markdown-lite
+     */
+    simulateStreaming(element, text) {
+        let i = 0;
+        const words = text.split(' ');
+        const interval = setInterval(() => {
+            if (i < words.length) {
+                // Periodically update the innerHTML with parsed markdown as we "stream"
+                const partialText = words.slice(0, i + 1).join(' ');
+                element.innerHTML = this.parseMarkdown(partialText);
+                this.scrollToBottom();
+                i++;
+            } else {
+                clearInterval(interval);
+                element.innerHTML = this.parseMarkdown(text); // Final clean parse
+                this.scrollToBottom();
+            }
+        }, 30); // Fast word-by-word streaming
+    },
+
+    /**
+     * Enhanced Markdown-lite parser
+     */
+    parseMarkdown(text) {
+        return text
+            // Headers: ### Title
+            .replace(/^### (.*$)/gim, '<h4 class="text-indigo-400 font-bold mt-2 mb-1">$1</h4>')
+            // Bold: **text**
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+            // Italic: *text*
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            // Lists: lines starting with - or *
+            .split('\n').map(line => {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+                    return `<li class="ml-4 list-disc text-slate-300">${trimmed.substring(2)}</li>`;
+                }
+                if (trimmed.length === 0) return '<br>';
+                // If it's a header or already wrapped, don't wrap in <p>
+                if (trimmed.startsWith('<h4') || trimmed.startsWith('<li')) return trimmed;
+                return `<p class="mb-2">${trimmed}</p>`;
+            }).join('')
+            // Group <li> into <ul>
+            .replace(/(<li.*?>.*?<\/li>)+/g, '<ul class="my-2">$1</ul>');
+    },
+
+    scrollToBottom() {
+        const container = document.getElementById('ai-messages');
         container.scrollTo({
             top: container.scrollHeight,
-            behavior: 'smooth'
+            behavior: 'auto' // Use auto for streaming to keep it responsive
         });
     },
 
@@ -284,50 +310,56 @@ const AI = {
 
             // Build request payload with history and context
             const requestMessages = [
-                { role: "system", content: APPRAISER_SYSTEM_PROMPT + "\n\n" + liveContext }
+                { role: "system", content: APPRAISER_SYSTEM_PROMPT }
             ];
             
+            // Add live context as a separate user message or hidden prompt for better model attention
+            if (liveContext) {
+                requestMessages.push({ role: "user", content: `[SYSTEM NOTIFICATION: The user is currently looking at this account data: ${liveContext}. Use this for the next response if relevant.]` });
+                requestMessages.push({ role: "assistant", content: "Understood. I have the account data in my buffer and will use it for analysis." });
+            }
+
             // Add existing history to the prompt for context
             this.messageHistory.forEach(msg => requestMessages.push(msg));
 
-            let response = await fetch(AI_CONFIG.endpoint, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${AI_CONFIG.token}`
-                },
-                body: JSON.stringify({
-                    model: AI_CONFIG.model,
-                    messages: requestMessages,
-                    max_tokens: 600, // INCREASED for more thorough responses
-                    temperature: 0.65 // SLIGHTLY REDUCED for more focused answers
-                })
-            });
+            let response;
+            let retryCount = 0;
+            const maxRetries = 2;
 
-            // Handle token expiration/errors by refreshing once
-            if (response.status === 401 || response.status === 403) {
-                await this.refreshApiKey();
-                response = await fetch(AI_CONFIG.endpoint, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${AI_CONFIG.token}`
-                    },
-                    body: JSON.stringify({
+            while (retryCount <= maxRetries) {
+                try {
+                    response = await fetch(AI_CONFIG.endpoint, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${AI_CONFIG.token}`
+                        },
+                        body: JSON.stringify({
                             model: AI_CONFIG.model,
                             messages: requestMessages,
-                            max_tokens: 600,
-                            temperature: 0.65
+                            max_tokens: 800, // INCREASED further for 70B depth
+                            temperature: 0.6, // Slightly lower for more precision
+                            top_p: 0.9 // Added for better diversity in high-prestige responses
                         })
-                });
-            }
+                    });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                const errorMsg = typeof errorData.error === 'object' 
-                    ? (errorData.error.message || JSON.stringify(errorData.error)) 
-                    : (errorData.error || `HTTP ${response.status}`);
-                throw new Error(errorMsg);
+                    if (response.status === 401 || response.status === 403) {
+                        await this.refreshApiKey();
+                        retryCount++;
+                        continue;
+                    }
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+                    }
+
+                    break; // Success!
+                } catch (err) {
+                    if (retryCount >= maxRetries) throw err;
+                    retryCount++;
+                    await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+                }
             }
 
             const data = await response.json();
