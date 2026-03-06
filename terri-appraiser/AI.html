@@ -197,32 +197,19 @@
             padding: 2rem;
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            gap: 1rem;
             scroll-behavior: smooth;
             mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
         }
 
         /* Override Chat Bubbles for Zen Page */
         .chat-bubble {
-            max-width: 100%;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            padding: 0;
-            margin-bottom: 0;
+            max-width: 85% !important; /* Force constraint */
             animation: fadeIn 0.8s ease-out;
         }
 
-        .bubble-ai { align-self: flex-start; width: 100%; }
-        .bubble-user { 
-            align-self: flex-end; 
-            text-align: right; 
-            color: #94a3b8;
-            font-size: 1.25rem;
-            font-weight: 300;
-            letter-spacing: -0.02em;
-            margin-top: 2rem;
-        }
+        .bubble-ai { align-self: flex-start; }
+        .bubble-user { align-self: flex-end; }
 
         .bubble-label { display: none; } /* Hide labels for zen feel */
 

@@ -456,22 +456,43 @@ footer { margin-top: 5rem; padding-top: 2.5rem; border-top: 1px solid var(--bord
     border-bottom-left-radius: 0.25rem;
 }
 
-/* Standalone AI Page Overrides */
+/* Standalone AI Page (Zen) Specific Overrides */
 #ai-messages .chat-bubble {
-    max-width: 100%;
-    background: transparent;
-    border: none;
-    padding: 0;
+    max-width: 90%;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 2rem;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 #ai-messages .bubble-user {
-    color: #94a3b8;
-    background: transparent;
+    background: rgba(99, 102, 241, 0.1);
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    font-weight: 400;
+    text-align: left; /* Keep text alignment standard for contained bubbles */
+    border-bottom-right-radius: 0.5rem;
     box-shadow: none;
-    font-size: 1.5rem;
-    font-weight: 300;
-    text-align: right;
-    margin-bottom: 1rem;
+    align-self: flex-end;
+}
+
+#ai-messages .bubble-ai {
+    background: rgba(15, 23, 42, 0.4);
+    border-bottom-left-radius: 0.5rem;
+    align-self: flex-start;
+}
+
+/* Ensure images/videos/tables don't break bubbles */
+.ai-response-container * {
+    max-width: 100%;
+    overflow-wrap: break-word;
+}
+
+.ai-response-container table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 /* Markdown Rendering Styles */
