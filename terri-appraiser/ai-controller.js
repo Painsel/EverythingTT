@@ -26,7 +26,10 @@ You are an advanced analytical engine designed to bridge the gap between **terri
 ### AI CAPABILITIES & TOOLS:
 - **URL CONTEXT**: You can "see" URLs provided by the user. Analyze them as clinical data sources.
 - **CODE EXECUTION**: You can generate JavaScript snippets. Use standard markdown code blocks with 'js' language tags. The user has a "Run" button to execute them in their browser environment.
-- **MARKDOWN**: Use full Markdown (Tables, Headers, Bold, Lists) for maximum data density.
+- **ADVANCED MARKDOWN**: Use the following structures for clinical density:
+    - **Tables**: Use for account metrics, interest curves, or market rates.
+    - **Callouts**: Use \` > [!INFO] \`, \` > [!WARNING] \`, or \` > [!SUCCESS] \` for strategic alerts.
+    - **Reasoning**: Always start responses with internal reasoning in \`<thought>\` tags.
 
 ### 1. EVERYTHINGTT-V1-PREVIEW (BY PAINSEL) KNOWLEDGE:
 - **PURPOSE**: A community-driven real-time account appraisal and market exchange tool.
@@ -231,25 +234,25 @@ const AI = {
         if (thoughtText) {
             const thoughtContainer = document.createElement('div');
             thoughtContainer.className = 'ai-thought-container';
+            const thoughtId = `thought-${Math.random().toString(36).substr(2, 9)}`;
+            
             thoughtContainer.innerHTML = `
-                <details open>
-                    <summary>
-                        <div class="ai-thought-header">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            Internal Reasoning
-                        </div>
-                    </summary>
-                    <div class="ai-thought-content"></div>
-                </details>
+                <div class="ai-thought-header" onclick="document.getElementById('${thoughtId}').classList.toggle('hidden')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Analytical Synthesis
+                </div>
+                <div id="${thoughtId}" class="ai-thought-content"></div>
             `;
             container.appendChild(thoughtContainer);
             const thoughtContent = thoughtContainer.querySelector('.ai-thought-content');
             
             // Stream the thought first
-            await this.simulateStreaming(thoughtContent, thoughtText, 20);
+            await this.simulateStreaming(thoughtContent, thoughtText, 15);
             
-            // Auto-collapse thought after it's done streaming (optional but clean)
-            // thoughtContainer.querySelector('details').open = false;
+            // Auto-collapse thought after it's done streaming
+            setTimeout(() => {
+                thoughtContent.classList.add('hidden');
+            }, 1000);
         }
 
         if (responseText) {
@@ -258,7 +261,7 @@ const AI = {
             container.appendChild(finalResponse);
             
             // Stream the final response
-            await this.simulateStreaming(finalResponse, responseText, 35);
+            await this.simulateStreaming(finalResponse, responseText, 30);
         }
     },
 
@@ -290,27 +293,38 @@ const AI = {
     },
 
     /**
-     * Advanced Markdown-lite parser supporting headers, bold, lists, tables, and code blocks
+     * Advanced Markdown-lite parser supporting headers, bold, lists, tables, code blocks, and callouts
      */
     parseMarkdown(text) {
         if (!text) return "";
         
         let html = text
-            // Escape HTML tags to prevent XSS but keep our thought tags
+            // Escape HTML tags to prevent XSS but keep our specific clinical tags
             .replace(/<(?!\/?thought|(?:\s*span\s+[^>]*)|(?:\s*div\s+[^>]*))/g, '&lt;')
             
-            // Tables (Experimental)
+            // Callouts (Experimental: > [!INFO])
+            .replace(/^> \(!(INFO|WARNING|SUCCESS)\)\n([\s\S]*?)(?=\n\n|\n$|$)/gm, (match, type, content) => {
+                const lowerType = type.toLowerCase();
+                const icon = type === 'SUCCESS' ? 'check-circle' : type === 'WARNING' ? 'alert-triangle' : 'info';
+                return `
+                    <div class="ai-callout callout-${lowerType}">
+                        <div class="callout-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        </div>
+                        <div class="callout-content">${content.trim()}</div>
+                    </div>`;
+            })
+
+            // Tables (Improved)
             .replace(/^\|(.+)\|$/gm, (match, content) => {
                 const cells = content.split('|').map(c => `<td>${c.trim()}</td>`).join('');
                 return `<tr>${cells}</tr>`;
             })
             .replace(/(<tr>.+<\/tr>)+/g, match => `<table>${match}</table>`)
-            // Clean up table headers (first row becomes <th>)
             .replace(/<table><tr>((?:<td>.+<\/td>)+)<\/tr>/, (match, content) => {
                 const headers = content.replace(/<td>/g, '<th>').replace(/<\/td>/g, '</th>');
                 return `<table><thead><tr>${headers}</tr></thead><tbody>`;
             })
-            .replace(/<\/tr><table>/g, '</tr>') // Fix nested tables from regex
             
             // Headers
             .replace(/^### (.*$)/gm, '<h3>$1</h3>')
@@ -345,14 +359,14 @@ const AI = {
             // URLs
             .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-indigo-400 hover:underline">$1</a>')
             
-            // Paragraphs (apply to non-html blocks)
+            // Paragraphs
             .split('\n\n').map(p => {
                 if (p.trim().startsWith('<') || p.trim().startsWith('<li>')) return p;
                 return `<p>${p.trim()}</p>`;
             }).join('');
 
         return html;
-    },
+    },"}]}
 
     /**
      * Executes JS code snippets from AI responses
