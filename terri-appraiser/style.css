@@ -446,14 +446,16 @@ footer { margin-top: 5rem; padding-top: 2.5rem; border-top: 1px solid var(--bord
 .zen-sidebar.collapsed {
     width: 0;
     padding: 0;
-    overflow: hidden;
+    transform: translateX(-100%);
     border-right: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .sidebar-toggle {
-    position: absolute;
+    position: fixed; /* Changed to fixed */
     top: 2rem;
-    right: -3rem;
+    left: 2rem; /* Start on the left */
     width: 2.5rem;
     height: 2.5rem;
     background: rgba(30, 41, 59, 0.8);
@@ -465,8 +467,8 @@ footer { margin-top: 5rem; padding-top: 2.5rem; border-top: 1px solid var(--bord
     justify-content: center;
     color: #818cf8;
     cursor: pointer;
-    z-index: 160;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 200; /* Above sidebar */
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-toggle:hover {
@@ -474,11 +476,16 @@ footer { margin-top: 5rem; padding-top: 2.5rem; border-top: 1px solid var(--bord
     color: white;
 }
 
-.zen-sidebar.collapsed .sidebar-toggle {
-    right: -3.5rem;
+/* Position toggle based on sidebar state */
+.zen-sidebar:not(.collapsed) ~ .sidebar-toggle {
+    left: calc(var(--sidebar-w) - 1.25rem);
 }
 
-.zen-sidebar.collapsed .sidebar-toggle svg {
+.zen-sidebar.collapsed ~ .sidebar-toggle {
+    left: 2rem;
+}
+
+.zen-sidebar.collapsed ~ .sidebar-toggle svg {
     transform: rotate(180deg);
 }
 
@@ -492,10 +499,39 @@ footer { margin-top: 5rem; padding-top: 2.5rem; border-top: 1px solid var(--bord
     position: relative;
     z-index: 10;
     transition: all 0.5s ease;
+    height: 100vh; /* Ensure full height */
 }
 
-.zen-sidebar.collapsed ~ .zen-container {
-    max-width: 1100px;
+/* Visible Scrollbar for Zen messages */
+#ai-messages {
+    flex: 1;
+    overflow-y: auto !important;
+    padding: 2rem;
+    padding-top: 4rem; /* Space for toggle */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    scroll-behavior: smooth;
+    /* Removed mask-image which was hiding scrollbar */
+}
+
+#ai-messages::-webkit-scrollbar {
+    width: 8px; /* Slightly wider */
+}
+
+#ai-messages::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+#ai-messages::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.5); /* Increased opacity */
+    border-radius: 10px;
+    border: 2px solid var(--zen-bg);
+}
+
+#ai-messages::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.8);
 }
 
 /* Enhanced Chat Bubbles */
