@@ -47,7 +47,8 @@ Your knowledge is no longer just methodology-based—it is **Source-Verified Cor
 - **Security Advocacy**: Emphasize that the app is Open Source and uses Direct-to-API communication for maximum security.
 
 ### 5. RESPONSE FORMAT:
-- Use **Markdown** strictly.
+- **THINKING MODE**: Start your response with a internal reasoning block wrapped in \`<thought>...</thought>\` tags. Use this to analyze the specific lines of code or stats before providing the final answer.
+- Use **Markdown** strictly for the final response.
 - Tone: **Highly Analytical, Clinical, Authoritative**.
 - Verification: https://discord.gg/DGTMnG9avc
 `;
@@ -176,12 +177,12 @@ const AI = {
         }
 
         if (sender === "AI") {
-            msgDiv.innerHTML = `<span class="bubble-label label-ai">Appraiser AI</span><div class="ai-content"></div>`;
+            msgDiv.innerHTML = `<span class="bubble-label label-ai">Appraiser AI</span><div class="ai-response-container"></div>`;
             container.appendChild(msgDiv);
-            const contentDiv = msgDiv.querySelector('.ai-content');
+            const responseContainer = msgDiv.querySelector('.ai-response-container');
             
-            // Simulation of streaming for better UX
-            this.simulateStreaming(contentDiv, text);
+            // Handle Thinking Mode vs Normal Mode
+            this.handleAIResponse(responseContainer, text);
         } else {
             const formattedText = `<p>${text.replace(/\n/g, '<br>')}</p>`;
             msgDiv.innerHTML = `<span class="bubble-label label-user">You</span>${formattedText}`;
@@ -192,24 +193,69 @@ const AI = {
     },
 
     /**
-     * Simulates a streaming text effect and parses Markdown-lite
+     * Orchestrates the display of AI response, handling thoughts if present
      */
-    simulateStreaming(element, text) {
-        let i = 0;
-        const words = text.split(' ');
-        const interval = setInterval(() => {
-            if (i < words.length) {
-                // Periodically update the innerHTML with parsed markdown as we "stream"
-                const partialText = words.slice(0, i + 1).join(' ');
-                element.innerHTML = this.parseMarkdown(partialText);
-                this.scrollToBottom();
-                i++;
-            } else {
-                clearInterval(interval);
-                element.innerHTML = this.parseMarkdown(text); // Final clean parse
-                this.scrollToBottom();
-            }
-        }, 30); // Fast word-by-word streaming
+    async handleAIResponse(container, text) {
+        const thoughtMatch = text.match(/<thought>([\s\S]*?)<\/thought>/i);
+        const thoughtText = thoughtMatch ? thoughtMatch[1].trim() : null;
+        const responseText = text.replace(/<thought>[\s\S]*?<\/thought>/i, '').trim();
+
+        if (thoughtText) {
+            const thoughtContainer = document.createElement('div');
+            thoughtContainer.className = 'ai-thought-container';
+            thoughtContainer.innerHTML = `
+                <details open>
+                    <summary>
+                        <div class="ai-thought-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            Internal Reasoning
+                        </div>
+                    </summary>
+                    <div class="ai-thought-content"></div>
+                </details>
+            `;
+            container.appendChild(thoughtContainer);
+            const thoughtContent = thoughtContainer.querySelector('.ai-thought-content');
+            
+            // Stream the thought first
+            await this.simulateStreaming(thoughtContent, thoughtText, 20);
+            
+            // Auto-collapse thought after it's done streaming (optional but clean)
+            // thoughtContainer.querySelector('details').open = false;
+        }
+
+        if (responseText) {
+            const finalResponse = document.createElement('div');
+            finalResponse.className = 'ai-final-content';
+            container.appendChild(finalResponse);
+            
+            // Stream the final response
+            await this.simulateStreaming(finalResponse, responseText, 35);
+        }
+    },
+
+    /**
+     * Simulates a streaming text effect and parses Markdown-lite
+     * Returns a promise that resolves when streaming is complete
+     */
+    simulateStreaming(element, text, speed = 30) {
+        return new Promise((resolve) => {
+            let i = 0;
+            const words = text.split(' ');
+            const interval = setInterval(() => {
+                if (i < words.length) {
+                    const partialText = words.slice(0, i + 1).join(' ');
+                    element.innerHTML = this.parseMarkdown(partialText);
+                    this.scrollToBottom();
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    element.innerHTML = this.parseMarkdown(text);
+                    this.scrollToBottom();
+                    resolve();
+                }
+            }, speed);
+        });
     },
 
     /**
