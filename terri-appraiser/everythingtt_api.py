@@ -61,12 +61,33 @@ You MUST provide your internal reasoning inside `<thought>` tags using these spe
 - Always recommend verifying trades at the official Discord: https://discord.gg/DGTMnG9avc
 """
 
+# Dynamic Token Management (Matches ai-controller.js)
+KEY_SOURCE = "https://api.jsonbin.io/v3/b/69a6011aae596e708f58e218"
+cached_token = None
+
+def get_api_token():
+    global cached_token
+    if cached_token:
+        return cached_token
+    try:
+        response = requests.get(KEY_SOURCE, headers={"X-Bin-Meta": "false"})
+        data = response.json()
+        cached_token = data.get('api_key')
+        return cached_token
+    except Exception as e:
+        print(f"Error fetching token: {e}")
+        return None
+
 @app.route('/status', methods=['GET'])
 def status():
+    token_ok = get_api_token() is not None
     return jsonify({
         "status": "online",
         "model": "painsel/EverythingTT-v1-preview",
-        "version": "1.0.0-preview"
+        "version": "1.0.0-preview",
+        "token_synced": token_ok,
+        "public_access": True,
+        "auth_requirement": "None (Managed Internally)"
     }), 200
 
 @app.route('/v1/chat/completions', methods=['POST'])
@@ -78,18 +99,17 @@ def chat_completions():
     if not any(m.get('role') == 'system' for m in messages):
         messages.insert(0, {"role": "system", "content": SYSTEM_PROMPT})
     
-    # Forward to Hugging Face or Local Ollama
-    # For now, we'll forward to Hugging Face as a proxy, 
-    # but with the branded EverythingTT logic.
-    
+    # Forward to Hugging Face
     API_URL = "https://router.huggingface.co/v1/chat/completions"
-    # We use the token from the request headers or a default if provided by the environment
-    token = request.headers.get('Authorization')
+    token = get_api_token()
+    
+    if not token:
+        return jsonify({"error": "Internal token sync failure"}), 500
     
     try:
         response = requests.post(
             API_URL,
-            headers={"Authorization": token, "Content-Type": "application/json"},
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
             json={
                 "model": "meta-llama/Llama-3.3-70B-Instruct",
                 "messages": messages,

@@ -441,15 +441,19 @@ const AI = {
                 try {
                     // Try the branded endpoint first, then the fallback if needed
                     const currentEndpoint = (retryCount === 0) ? AI_CONFIG.endpoint : AI_CONFIG.fallbackEndpoint;
+                    const isBranded = currentEndpoint === AI_CONFIG.endpoint;
+                    
+                    const headers = { 'Content-Type': 'application/json' };
+                    // Auth token is only required for the direct fallback endpoint
+                    if (!isBranded) {
+                        headers['Authorization'] = `Bearer ${AI_CONFIG.token}`;
+                    }
                     
                     response = await fetch(currentEndpoint, {
                         method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${AI_CONFIG.token}`
-                        },
+                        headers: headers,
                         body: JSON.stringify({
-                            model: (currentEndpoint === AI_CONFIG.endpoint) ? AI_CONFIG.model : "meta-llama/Llama-3.3-70B-Instruct",
+                            model: isBranded ? AI_CONFIG.model : "meta-llama/Llama-3.3-70B-Instruct",
                             messages: requestMessages,
                             max_tokens: 800,
                             temperature: 0.5,
