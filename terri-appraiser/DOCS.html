@@ -245,7 +245,7 @@ console.log(data.choices[0].message.content);</pre>
         const API_BASE = "https://kecia-ungreeted-neologically.ngrok-free.dev";
 
         /**
-         * Checks the API server status on load
+         * Checks the API server status on load and polls periodically
          */
         async function checkApiStatus() {
             const dot = document.getElementById('status-dot');
@@ -255,22 +255,18 @@ console.log(data.choices[0].message.content);</pre>
             try {
                 const response = await fetch(`${API_BASE}/status`, { method: 'GET', signal: AbortSignal.timeout(5000) });
                 if (response.ok) {
-                    dot.classList.remove('bg-slate-500', 'animate-pulse');
-                    dot.classList.add('bg-emerald-500');
+                    dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
                     text.innerText = "ONLINE";
-                    text.classList.remove('text-slate-500');
-                    text.classList.add('text-emerald-500');
-                    badge.classList.add('border-emerald-500/20', 'bg-emerald-500/5');
+                    text.className = 'text-[10px] font-black uppercase tracking-widest text-emerald-500';
+                    badge.className = 'flex items-center gap-2 px-3 py-1 border border-emerald-500/20 bg-emerald-500/5 rounded-full transition-all';
                 } else {
                     throw new Error();
                 }
             } catch (err) {
-                dot.classList.remove('bg-slate-500', 'animate-pulse');
-                dot.classList.add('bg-rose-500');
+                dot.className = 'w-2 h-2 rounded-full bg-rose-500';
                 text.innerText = "OFFLINE";
-                text.classList.remove('text-slate-500');
-                text.classList.add('text-rose-500');
-                badge.classList.add('border-rose-500/20', 'bg-rose-500/5');
+                text.className = 'text-[10px] font-black uppercase tracking-widest text-rose-500';
+                badge.className = 'flex items-center gap-2 px-3 py-1 border border-rose-500/20 bg-rose-500/5 rounded-full transition-all';
             }
         }
 
@@ -323,8 +319,12 @@ console.log(data.choices[0].message.content);</pre>
             }
         }
 
-        // Initialize status check
-        window.addEventListener('DOMContentLoaded', checkApiStatus);
+        // Initialize status check and polling
+        window.addEventListener('DOMContentLoaded', () => {
+            checkApiStatus();
+            // Poll status every 30 seconds
+            setInterval(checkApiStatus, 30000);
+        });
     </script>
 
 </body>
