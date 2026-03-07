@@ -11,8 +11,8 @@ const AI_CONFIG = {
     codexModel: "painsel/EverythingTT-v1-preview-CODEX:free",
     currentModel: "painsel/EverythingTT-v1-preview:free",
     
-    // Branded EverythingTT-v1-preview Endpoint (Local -> Ngrok Ephemeral)
-    endpoint: "https://kecia-ungreeted-neologically.ngrok-free.dev/v1/chat/completions",
+    // Branded EverythingTT-v1-preview Endpoint (Localtunnel Backup)
+    endpoint: "https://bright-plums-drum.loca.lt/v1/chat/completions",
     // Handshake Key (Mandatory - Set by Auth system in AI.html)
     customKey: null
 };
