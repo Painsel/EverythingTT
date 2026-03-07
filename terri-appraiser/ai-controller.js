@@ -166,11 +166,8 @@ const AI = {
      * Fetches the latest API key from JSONBin to prevent manual update needs
      */
     async refreshApiKey() {
-        const input = document.getElementById('api-key');
-        if (input && input.value) {
-            AI_CONFIG.customKey = input.value;
-            
-            // --- DYNAMIC ENDPOINT MAPPING ---
+        // --- DYNAMIC ENDPOINT MAPPING ---
+        if (AI_CONFIG.customKey) {
             const isPro = AI_CONFIG.customKey.startsWith("ett_pro_");
             const suffix = isPro ? "" : ":free";
             AI_CONFIG.languageModel = `painsel/EverythingTT-v1-preview${suffix}`;
@@ -181,6 +178,7 @@ const AI = {
             AI_CONFIG.currentModel = isCodex ? AI_CONFIG.codexModel : AI_CONFIG.languageModel;
             
             console.log(`[EverythingTT] Engine mapping updated for ${isPro ? 'PRO' : 'FREE'} key.`);
+            return; // Use the custom key set by Auth system
         }
 
         if (this.isRefreshing) return;

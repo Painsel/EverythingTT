@@ -486,14 +486,27 @@
         const Auth = {
             currentUser: null,
             activeKey: null,
+            isProcessing: false,
             // Use Ngrok if available, else localhost
             baseUrl: "https://kecia-ungreeted-neologically.ngrok-free.dev",
+
+            setLoading(state) {
+                this.isProcessing = state;
+                const buttons = document.querySelectorAll('#auth-forms button, #upgrade-form button');
+                buttons.forEach(btn => {
+                    btn.disabled = state;
+                    btn.style.opacity = state ? '0.5' : '1';
+                    if (state) btn.classList.add('animate-pulse');
+                    else btn.classList.remove('animate-pulse');
+                });
+            },
 
             async register() {
                 const u = document.getElementById('username').value;
                 const p = document.getElementById('password').value;
                 if (!u || !p) return alert("Credentials required.");
-
+                
+                this.setLoading(true);
                 try {
                     const res = await fetch(`${this.baseUrl}/auth/register`, {
                         method: 'POST',
@@ -505,18 +518,30 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        alert("Identity assigned. You may now access.");
+                        // Auto-login after registration
+                        this.currentUser = { 
+                            username: data.username, 
+                            password: p, 
+                            balance: data.balance, 
+                            keys: data.keys, 
+                            is_pro: data.is_pro,
+                            is_dev: data.is_dev
+                        };
+                        localStorage.setItem('ett_identity', JSON.stringify({ u, p }));
+                        this.updateUI();
                     } else {
                         alert(`Error: ${data.error || 'Registration failed'}`);
                     }
                 } catch (e) { alert("API Offline or unreachable"); }
+                finally { this.setLoading(false); }
             },
 
-            async login() {
-                const u = document.getElementById('username').value;
-                const p = document.getElementById('password').value;
+            async login(storedCreds = null) {
+                const u = storedCreds ? storedCreds.u : document.getElementById('username').value;
+                const p = storedCreds ? storedCreds.p : document.getElementById('password').value;
                 if (!u || !p) return alert("Credentials required.");
 
+                this.setLoading(true);
                 try {
                     const res = await fetch(`${this.baseUrl}/auth/login`, {
                         method: 'POST',
@@ -536,11 +561,15 @@
                             is_pro: data.is_pro,
                             is_dev: data.is_dev
                         };
+                        localStorage.setItem('ett_identity', JSON.stringify({ u, p }));
                         this.updateUI();
                     } else {
-                        alert(`Error: ${data.error || 'Login failed'}`);
+                        if (!storedCreds) alert(`Error: ${data.error || 'Login failed'}`);
+                        else localStorage.removeItem('ett_identity');
                     }
-                } catch (e) { alert("API Offline or unreachable"); }
+                } catch (e) { 
+                    if (!storedCreds) alert("API Offline or unreachable"); 
+                } finally { this.setLoading(false); }
             },
 
             async upgrade() {
@@ -549,6 +578,7 @@
                 const t_p = document.getElementById('t-password').value;
                 if (!t_u || !t_p) return alert("Territorial credentials required for gold transfer.");
 
+                this.setLoading(true);
                 try {
                     const res = await fetch(`${this.baseUrl}/auth/upgrade`, {
                         method: 'POST',
@@ -574,6 +604,7 @@
                         alert(`Upgrade Failed: ${data.error}`);
                     }
                 } catch (e) { alert("Upgrade API unreachable"); }
+                finally { this.setLoading(false); }
             },
 
             async createKey() {
@@ -671,6 +702,7 @@
                 this.currentUser = null;
                 this.activeKey = null;
                 AI_CONFIG.customKey = null;
+                localStorage.removeItem('ett_identity');
                 document.getElementById('auth-forms').classList.remove('hidden');
                 document.getElementById('user-profile').classList.add('hidden');
                 document.getElementById('gen-key-btn').classList.add('hidden');
@@ -683,6 +715,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Auto-focus input
             document.getElementById('ai-input').focus();
+
+            // Restore Identity if exists
+            const stored = localStorage.getItem('ett_identity');
+            if (stored) {
+                try {
+                    const creds = JSON.parse(stored);
+                    Auth.login(creds);
+                } catch (e) { localStorage.removeItem('ett_identity'); }
+            }
             
             // Subtle entry animation for messages
             const messages = document.getElementById('ai-messages');
