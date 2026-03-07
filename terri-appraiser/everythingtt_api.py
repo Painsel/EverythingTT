@@ -85,6 +85,12 @@ You are the **EverythingTT-v1-preview-CODEX (by painsel)**.
 ### CORE DIRECTIVE:
 You are an elite software engineering agent specializing in **territorial.io** automation, canvas-based game engines, and economic simulation scripts. Your primary language is JavaScript (the language of David Tschacher's engine).
 
+### TECHNICAL INTELLIGENCE:
+- **CLIENT-SIDE HOOKING**: You have deep knowledge of hooking into the `window.game` state, `PIXI.js` (if applicable), and raw `2D Canvas API` calls.
+- **ALGORITHMIC SYNTHESIS**: You can clinically translate game mechanics (Interest, Purge, Troops) into optimized JS functions.
+- **BOT DETECTION BYPASS**: Your code follows human-like interaction patterns (simulated latency, non-linear pixel offsets).
+- **NETWORK PROTOCOLS**: You understand binary WebSocket payloads used in the David Tschacher engine.
+
 ### CODING CAPABILITIES:
 - **THICK CLIENT INTERFACING**: Write code to interact with `canvasA`, WebSockets, and the game's internal data structures.
 - **AUTOMATION**: Generate scripts for automated interest calculation, market analysis, and scan automation.
@@ -95,6 +101,7 @@ You are an elite software engineering agent specializing in **territorial.io** a
 - Provide high-fidelity, production-ready code snippets.
 - Use standard markdown code blocks with appropriate language tags (js, html, css, py).
 - Explain the clinical logic behind your code.
+- Always start responses with internal reasoning in `<thought>` tags using **[CODE_ANALYSIS]**, **[ALGORITHMIC_SIMULATION]**, and **[TECHNICAL_SYNTHESIS]**.
 """
 
 # Dynamic Token Management (Matches ai-controller.js)
@@ -283,8 +290,10 @@ def chat_completions():
     model = data.get('model', 'painsel/EverythingTT-v1-preview:free')
     messages = data.get('messages', [])
     
-    # Determine system prompt based on model
-    sys_prompt = CODEX_SYSTEM_PROMPT if "CODEX" in model else SYSTEM_PROMPT
+    # Determine system prompt and model based on request
+    is_codex = "CODEX" in model
+    sys_prompt = CODEX_SYSTEM_PROMPT if is_codex else SYSTEM_PROMPT
+    underlying_model = "Qwen/Qwen2.5-Coder-32B-Instruct" if is_codex else "meta-llama/Llama-3.3-70B-Instruct"
     
     if not any(m.get('role') == 'system' for m in messages):
         messages.insert(0, {"role": "system", "content": sys_prompt})
@@ -300,10 +309,10 @@ def chat_completions():
             API_URL,
             headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
             json={
-                "model": "meta-llama/Llama-3.3-70B-Instruct",
+                "model": underlying_model,
                 "messages": messages,
                 "max_tokens": 1000,
-                "temperature": 0.5
+                "temperature": 0.3 if is_codex else 0.5
             }
         )
         return jsonify(response.json()), response.status_code
