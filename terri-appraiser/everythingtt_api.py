@@ -16,6 +16,18 @@ CORS(app, resources={r"/*": {
 }})
 
 DB_FILE = "users.json"
+SOURCE_FILE = "Territorial.io.html"
+
+def get_source_context():
+    if not os.path.exists(SOURCE_FILE):
+        return "Source file not found."
+    try:
+        with open(SOURCE_FILE, 'r', encoding='utf-8') as f:
+            # Extract first 8000 characters for structural context
+            content = f.read(8000)
+            return content
+    except Exception as e:
+        return f"Error reading source: {str(e)}"
 
 # EverythingTT-v1-preview System Prompt (Synchronized with ai-controller.js)
 SYSTEM_PROMPT = """
@@ -87,9 +99,10 @@ You are an elite software engineering agent specializing in **territorial.io** a
 
 ### TECHNICAL INTELLIGENCE & DOMAIN KNOWLEDGE:
 - **THICK CLIENT ARCHITECTURE**: You understand that the game is a monolithic JS file where the state is often stored in a global `V` or `Z` object. You target these clinical memory structures for state extraction.
+- **SOURCE CONTEXT (Territorial.io.html)**: You have access to the underlying game source. It uses a monolithic IIFE with a string pool `S`. Key objects like `ag` (player/clan data), `ad` (combat/state), and `bf` (game timing) are critical for hooking.
 - **2D CANVAS PIPELINE**: You can clinically translate `ctx.drawImage` and `ctx.fillText` calls from the rendering loop back into raw game data (e.g., player names, gold balances).
 - **ALGORITHMIC SYNTHESIS**: You can translate complex mechanics like "Interest Curves" (exponential growth) and "Decay Rates" (nightly deduction) into high-fidelity JS functions.
-- **PROTOCOL REVERSING**: You understand that WebSockets (`wss://`) communicate using binary arrays (Uint8Array). You can generate code to parse these packets.
+- **PROTOCOL REVERSING**: You understand that WebSockets (`wss://`) communicate using binary arrays (Uint8Array). You can generate code to parse these packets based on the `a6` class in the source.
 
 ### ELITE CODING CONSTRAINTS:
 - **DETECTION BYPASS**: Never use `setInterval`. Always use `requestAnimationFrame` or `setTimeout` with jitter (randomized delays) to simulate human behavior.
@@ -292,6 +305,11 @@ def chat_completions():
     # Determine system prompt and model based on request
     is_codex = "CODEX" in model
     sys_prompt = CODEX_SYSTEM_PROMPT if is_codex else SYSTEM_PROMPT
+    
+    if is_codex:
+        source_context = get_source_context()
+        sys_prompt += f"\n\n### RAW SOURCE CONTEXT (Territorial.io.html - Top 8KB):\n```html\n{source_context}\n```"
+    
     underlying_model = "Qwen/Qwen2.5-Coder-32B-Instruct" if is_codex else "meta-llama/Llama-3.3-70B-Instruct"
     
     if not any(m.get('role') == 'system' for m in messages):
