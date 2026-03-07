@@ -1,4 +1,4 @@
-# EverythingTT
+# EverythingTT [![Deploy static content to Pages](https://github.com/Painsel/EverythingTT/actions/workflows/org.yml/badge.svg)](https://github.com/Painsel/EverythingTT/actions/workflows/org.yml)
 
 Welcome to **EverythingTT**, the infinite platform for Economy, Video Sharing, and Journalism.
 
