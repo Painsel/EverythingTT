@@ -346,9 +346,11 @@
             <span class="sidebar-label">Pro Sanctuary</span>
             <p class="text-[9px] text-slate-400 mb-4 leading-relaxed">Upgrade to Pro for 1000 ETT Tokens and specialized CODEX access. Required: 10,000 Gold monthly.</p>
             <div id="upgrade-form" class="hidden">
-                <input type="text" id="t-username" placeholder="Game Account Name" class="auth-input">
-                <input type="password" id="t-password" placeholder="Game API Password" class="auth-input">
-                <button onclick="Auth.upgrade()" class="sidebar-btn btn-solid" style="background: linear-gradient(to right, #f59e0b, #d97706); border: none;">Pay 10K Gold</button>
+                <form id="pro-upgrade-form" onsubmit="event.preventDefault();">
+                    <input type="text" id="t-username" name="t-username" autocomplete="username" placeholder="Game Account Name" class="auth-input">
+                    <input type="password" id="t-password" name="t-password" autocomplete="current-password" placeholder="Game API Password" class="auth-input">
+                    <button type="button" onclick="Auth.upgrade()" class="sidebar-btn btn-solid" style="background: linear-gradient(to right, #f59e0b, #d97706); border: none;">Pay 10K Gold</button>
+                </form>
             </div>
             <p id="pro-status-msg" class="text-[10px] text-emerald-500 font-bold hidden">PRO ACCESS ACTIVE</p>
         </div>
@@ -612,7 +614,7 @@
 
                 if (this.currentUser.is_pro || this.currentUser.is_dev) {
                     // refreshApiKey in controller now handles dynamic endpoint mapping
-                } else {
+                }
 
                 // Only show generate button if no keys exist
                 const genBtn = document.getElementById('gen-key-btn');
