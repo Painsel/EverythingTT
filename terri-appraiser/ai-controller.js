@@ -139,6 +139,23 @@ const AI = {
      * Fetches the latest API key from JSONBin to prevent manual update needs
      */
     async refreshApiKey() {
+        const input = document.getElementById('api-key');
+        if (input && input.value) {
+            AI_CONFIG.customKey = input.value;
+            
+            // --- DYNAMIC ENDPOINT MAPPING ---
+            const isPro = AI_CONFIG.customKey.startsWith("ett_pro_");
+            const suffix = isPro ? "" : ":free";
+            AI_CONFIG.languageModel = `painsel/EverythingTT-v1-preview${suffix}`;
+            AI_CONFIG.codexModel = `painsel/EverythingTT-v1-preview-CODEX${suffix}`;
+            
+            // Update current model if it was one of the defaults
+            const isCodex = AI_CONFIG.currentModel.includes("CODEX");
+            AI_CONFIG.currentModel = isCodex ? AI_CONFIG.codexModel : AI_CONFIG.languageModel;
+            
+            console.log(`[EverythingTT] Engine mapping updated for ${isPro ? 'PRO' : 'FREE'} key.`);
+        }
+
         if (this.isRefreshing) return;
         this.isRefreshing = true;
         try {

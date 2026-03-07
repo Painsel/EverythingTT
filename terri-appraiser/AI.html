@@ -584,12 +584,7 @@
                     proBadge.classList.remove('hidden');
                     upgradeForm.classList.add('hidden');
                     proMsg.classList.remove('hidden');
-                    // Automatically update model endpoints if pro
-                    AI_CONFIG.languageModel = "painsel/EverythingTT-v1-preview";
-                    AI_CONFIG.codexModel = "painsel/EverythingTT-v1-preview-CODEX";
-                    // Refresh current engine string
-                    const currentType = document.getElementById('model-tab-codex').classList.contains('active') ? 'codex' : 'language';
-                    AI_CONFIG.currentModel = currentType === 'codex' ? AI_CONFIG.codexModel : AI_CONFIG.languageModel;
+                    // refreshApiKey in controller now handles dynamic endpoint mapping
                 } else {
                     proBadge.classList.add('hidden');
                     upgradeForm.classList.remove('hidden');

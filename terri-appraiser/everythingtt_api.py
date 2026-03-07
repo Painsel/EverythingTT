@@ -353,9 +353,17 @@ def chat_completions():
     model = data.get('model', 'painsel/EverythingTT-v1-preview:free')
     messages = data.get('messages', [])
     
+    # --- STRICT TIER VALIDATION ---
+    is_pro = api_key.startswith("ett_pro_")
+    requested_free = ":free" in model
+    
+    if is_pro and requested_free:
+        return jsonify({"error": "PRO keys must use endpoints without the ':free' suffix."}), 403
+    if not is_pro and not requested_free:
+        return jsonify({"error": "FREE keys must use endpoints with the ':free' suffix."}), 403
+    
     # Determine system prompt and model based on request
     is_codex = "CODEX" in model
-    is_pro = api_key.startswith("ett_pro_")
     
     sys_prompt = CODEX_SYSTEM_PROMPT if is_codex else SYSTEM_PROMPT
     
