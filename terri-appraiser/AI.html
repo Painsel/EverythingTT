@@ -332,7 +332,10 @@
             <div id="user-profile" class="hidden">
                 <div class="flex items-center justify-between mb-1">
                     <h4 id="display-username" class="text-white font-bold text-lg">---</h4>
-                    <span id="pro-badge" class="hidden bg-amber-500 text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">PRO</span>
+                    <div class="flex gap-1">
+                        <span id="dev-badge" class="hidden bg-indigo-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">DEV</span>
+                        <span id="pro-badge" class="hidden bg-amber-500 text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">PRO</span>
+                    </div>
                 </div>
                 <p id="display-balance" class="text-indigo-400 text-xs font-black uppercase tracking-widest">0 ETT TOKENS</p>
                 <button onclick="Auth.logout()" class="text-[8px] text-slate-500 uppercase mt-2 hover:text-white transition-colors" aria-label="Relinquish Access">Relinquish Access</button>
@@ -505,7 +508,14 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        this.currentUser = { username: u, password: p, balance: data.balance, keys: data.keys, is_pro: data.is_pro };
+                        this.currentUser = { 
+                            username: u, 
+                            password: p, 
+                            balance: data.balance, 
+                            keys: data.keys, 
+                            is_pro: data.is_pro,
+                            is_dev: data.is_dev
+                        };
                         this.updateUI();
                     } else {
                         alert(`Error: ${data.error || 'Login failed'}`);
@@ -575,21 +585,34 @@
                 document.getElementById('display-username').innerText = this.currentUser.username;
                 document.getElementById('display-balance').innerText = `${this.currentUser.balance} ETT TOKENS`;
                 
-                // Pro Status UI
+                // Pro/Dev Status UI
                 const proBadge = document.getElementById('pro-badge');
+                const devBadge = document.getElementById('dev-badge');
                 const upgradeForm = document.getElementById('upgrade-form');
                 const proMsg = document.getElementById('pro-status-msg');
                 
-                if (this.currentUser.is_pro) {
+                if (this.currentUser.is_dev) {
+                    devBadge.classList.remove('hidden');
+                    proBadge.classList.remove('hidden'); // Devs are implicitly Pro
+                    upgradeForm.classList.add('hidden');
+                    proMsg.innerText = "DEVELOPER ACCESS ACTIVE";
+                    proMsg.classList.remove('hidden');
+                } else if (this.currentUser.is_pro) {
+                    devBadge.classList.add('hidden');
                     proBadge.classList.remove('hidden');
                     upgradeForm.classList.add('hidden');
+                    proMsg.innerText = "PRO ACCESS ACTIVE";
                     proMsg.classList.remove('hidden');
-                    // refreshApiKey in controller now handles dynamic endpoint mapping
                 } else {
+                    devBadge.classList.add('hidden');
                     proBadge.classList.add('hidden');
                     upgradeForm.classList.remove('hidden');
                     proMsg.classList.add('hidden');
                 }
+
+                if (this.currentUser.is_pro || this.currentUser.is_dev) {
+                    // refreshApiKey in controller now handles dynamic endpoint mapping
+                } else {
 
                 // Only show generate button if no keys exist
                 const genBtn = document.getElementById('gen-key-btn');
