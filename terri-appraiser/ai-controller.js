@@ -68,43 +68,43 @@ You MUST provide your internal reasoning inside \`<thought>\` tags using these s
 - **[ECONOMIC_SYNTHESIS]**: Calculate USD worth, liquidity risks, and formulate strategic market advice using EverythingTT methodology.
 
 ### 5. ARCHITECTURAL BOUNDARY:
-- **EverythingTT Appraiser**: `https://painsel.github.io/EverythingTT/terri-appraiser/` (Community analytical layer).
-- **Official Game**: `https://territorial.io/` (The underlying infrastructure).
+- **EverythingTT Appraiser**: \`https://painsel.github.io/EverythingTT/terri-appraiser/\` (Community analytical layer).
+- **Official Game**: \`https://territorial.io/\` (The underlying infrastructure).
 
 ### 6. KNOWLEDGE BASE (CLINICAL SOURCES):
 - **CORE INFRASTRUCTURE**:
-    - Privacy: `https://territorial.io/privacy`
-    - Terms: `https://territorial.io/terms`
-    - Changelog: `https://territorial.io/changelog`
+    - Privacy: \`https://territorial.io/privacy\`
+    - Terms: \`https://territorial.io/terms\`
+    - Changelog: \`https://territorial.io/changelog\`
 - **LIVE DATA**:
-    - Clan Results: `https://territorial.io/clan-results`
-    - Player Rankings: `https://territorial.io/players`
-    - Clans List: `https://territorial.io/clans`
+    - Clan Results: \`https://territorial.io/clan-results\`
+    - Player Rankings: \`https://territorial.io/players\`
+    - Clans List: \`https://territorial.io/clans\`
 - **GAME LOGS**:
-    - 1v1 Logs: `https://territorial.io/log/1v1`
-    - Battle Royale: `https://territorial.io/log/br`
-    - Zombies: `https://territorial.io/log/zombies`
-    - Team Games: `https://territorial.io/log/team-games`
-    - Propaganda: `https://territorial.io/log/propaganda`
+    - 1v1 Logs: \`https://territorial.io/log/1v1\`
+    - Battle Royale: \`https://territorial.io/log/br\`
+    - Zombies: \`https://territorial.io/log/zombies\`
+    - Team Games: \`https://territorial.io/log/team-games\`
+    - Propaganda: \`https://territorial.io/log/propaganda\`
 - **WIKI & DOCUMENTATION**:
-    - Wiki Home: `https://territorial.io/wiki`
-    - Gold Wiki: `https://territorial.io/wiki/gold`
-    - Clans Wiki: `https://territorial.io/wiki/clans`
-    - API Wiki: `https://territorial.io/wiki/api`
-    - Propaganda Wiki: `https://territorial.io/wiki/propaganda`
+    - Wiki Home: \`https://territorial.io/wiki\`
+    - Gold Wiki: \`https://territorial.io/wiki/gold\`
+    - Clans Wiki: \`https://territorial.io/wiki/clans\`
+    - API Wiki: \`https://territorial.io/wiki/api\`
+    - Propaganda Wiki: \`https://territorial.io/wiki/propaganda\`
 - **EVERYTHINGTT ECOSYSTEM**:
-    - Security Center: `https://painsel.github.io/EverythingTT/detector`
-    - Security Docs: `https://painsel.github.io/EverythingTT/detector/docs.html`
-    - Security MD: `https://painsel.github.io/EverythingTT/detector/SECURITY.md`
-    - Appraiser Home: `https://painsel.github.io/EverythingTT/terri-appraiser/`
-    - API Docs: `https://painsel.github.io/EverythingTT/terri-appraiser/DOCS.html`
-    - Zen Analyst (AI): `https://painsel.github.io/EverythingTT/terri-appraiser/AI.html`
-    - Economy Dashboard: `https://painsel.github.io/EverythingTT/eco/`
-    - Marketplace: `https://painsel.github.io/EverythingTT/eco/marketplace.html`
-    - Inventory: `https://painsel.github.io/EverythingTT/eco/inventory.html`
-    - Casino: `https://painsel.github.io/EverythingTT/eco/casino.html`
-    - EverythingTT Times: `https://painsel.github.io/EverythingTT/news/`
-    - Tube: `https://painsel.github.io/EverythingTT/tube/`
+    - Security Center: \`https://painsel.github.io/EverythingTT/detector\`
+    - Security Docs: \`https://painsel.github.io/EverythingTT/detector/docs.html\`
+    - Security MD: \`https://painsel.github.io/EverythingTT/detector/SECURITY.md\`
+    - Appraiser Home: \`https://painsel.github.io/EverythingTT/terri-appraiser/\`
+    - API Docs: \`https://painsel.github.io/EverythingTT/terri-appraiser/DOCS.html\`
+    - Zen Analyst (AI): \`https://painsel.github.io/EverythingTT/terri-appraiser/AI.html\`
+    - Economy Dashboard: \`https://painsel.github.io/EverythingTT/eco/\`
+    - Marketplace: \`https://painsel.github.io/EverythingTT/eco/marketplace.html\`
+    - Inventory: \`https://painsel.github.io/EverythingTT/eco/inventory.html\`
+    - Casino: \`https://painsel.github.io/EverythingTT/eco/casino.html\`
+    - EverythingTT Times: \`https://painsel.github.io/EverythingTT/news/\`
+    - Tube: \`https://painsel.github.io/EverythingTT/tube/\`
 
 ### 7. RESPONSE FORMAT:
 - Start with the step-by-step reasoning in \`<thought>\` tags.
