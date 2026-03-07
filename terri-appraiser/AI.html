@@ -330,10 +330,24 @@
                 </form>
             </div>
             <div id="user-profile" class="hidden">
-                <h4 id="display-username" class="text-white font-bold text-lg mb-1">---</h4>
+                <div class="flex items-center justify-between mb-1">
+                    <h4 id="display-username" class="text-white font-bold text-lg">---</h4>
+                    <span id="pro-badge" class="hidden bg-amber-500 text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">PRO</span>
+                </div>
                 <p id="display-balance" class="text-indigo-400 text-xs font-black uppercase tracking-widest">0 ETT TOKENS</p>
                 <button onclick="Auth.logout()" class="text-[8px] text-slate-500 uppercase mt-2 hover:text-white transition-colors" aria-label="Relinquish Access">Relinquish Access</button>
             </div>
+        </div>
+
+        <div class="sidebar-section" id="upgrade-section">
+            <span class="sidebar-label">Pro Sanctuary</span>
+            <p class="text-[9px] text-slate-400 mb-4 leading-relaxed">Upgrade to Pro for 1000 ETT Tokens and specialized CODEX access. Required: 10,000 Gold monthly.</p>
+            <div id="upgrade-form" class="hidden">
+                <input type="text" id="t-username" placeholder="Game Account Name" class="auth-input">
+                <input type="password" id="t-password" placeholder="Game API Password" class="auth-input">
+                <button onclick="Auth.upgrade()" class="sidebar-btn btn-solid" style="background: linear-gradient(to right, #f59e0b, #d97706); border: none;">Pay 10K Gold</button>
+            </div>
+            <p id="pro-status-msg" class="text-[10px] text-emerald-500 font-bold hidden">PRO ACCESS ACTIVE</p>
         </div>
 
         <div class="sidebar-section">
@@ -381,6 +395,22 @@
             <h1 class="text-3xl font-black text-white uppercase tracking-[0.3em] mb-1">EverythingTT</h1>
             <p class="text-[10px] text-indigo-400 font-black uppercase tracking-[0.5em]">Clinical Analysis • v1-preview</p>
         </header>
+
+        <!-- MODEL SELECTION -->
+        <div class="model-selector-container">
+            <button id="model-tab-lang" onclick="AI.setEngine('language')" class="model-tab active">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span>General</span>
+                </div>
+            </button>
+            <button id="model-tab-codex" onclick="AI.setEngine('codex')" class="model-tab">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    <span>CODEX</span>
+                </div>
+            </button>
+        </div>
 
         <div id="ai-messages" class="custom-scrollbar">
             <!-- Initial Zen Message -->
@@ -475,12 +505,45 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        this.currentUser = { username: u, password: p, balance: data.balance, keys: data.keys };
+                        this.currentUser = { username: u, password: p, balance: data.balance, keys: data.keys, is_pro: data.is_pro };
                         this.updateUI();
                     } else {
                         alert(`Error: ${data.error || 'Login failed'}`);
                     }
                 } catch (e) { alert("API Offline or unreachable"); }
+            },
+
+            async upgrade() {
+                if (!this.currentUser) return;
+                const t_u = document.getElementById('t-username').value;
+                const t_p = document.getElementById('t-password').value;
+                if (!t_u || !t_p) return alert("Territorial credentials required for gold transfer.");
+
+                try {
+                    const res = await fetch(`${this.baseUrl}/auth/upgrade`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        },
+                        body: JSON.stringify({ 
+                            username: this.currentUser.username, 
+                            password: this.currentUser.password,
+                            t_username: t_u,
+                            t_password: t_p
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.currentUser.is_pro = true;
+                        this.currentUser.balance += 1000;
+                        this.currentUser.keys.push(data.key);
+                        alert("Upgrade Successful! 1000 ETT Tokens added.");
+                        this.updateUI();
+                    } else {
+                        alert(`Upgrade Failed: ${data.error}`);
+                    }
+                } catch (e) { alert("Upgrade API unreachable"); }
             },
 
             async createKey() {
@@ -512,6 +575,27 @@
                 document.getElementById('display-username').innerText = this.currentUser.username;
                 document.getElementById('display-balance').innerText = `${this.currentUser.balance} ETT TOKENS`;
                 
+                // Pro Status UI
+                const proBadge = document.getElementById('pro-badge');
+                const upgradeForm = document.getElementById('upgrade-form');
+                const proMsg = document.getElementById('pro-status-msg');
+                
+                if (this.currentUser.is_pro) {
+                    proBadge.classList.remove('hidden');
+                    upgradeForm.classList.add('hidden');
+                    proMsg.classList.remove('hidden');
+                    // Automatically update model endpoints if pro
+                    AI_CONFIG.languageModel = "painsel/EverythingTT-v1-preview";
+                    AI_CONFIG.codexModel = "painsel/EverythingTT-v1-preview-CODEX";
+                    // Refresh current engine string
+                    const currentType = document.getElementById('model-tab-codex').classList.contains('active') ? 'codex' : 'language';
+                    AI_CONFIG.currentModel = currentType === 'codex' ? AI_CONFIG.codexModel : AI_CONFIG.languageModel;
+                } else {
+                    proBadge.classList.add('hidden');
+                    upgradeForm.classList.remove('hidden');
+                    proMsg.classList.add('hidden');
+                }
+
                 // Only show generate button if no keys exist
                 const genBtn = document.getElementById('gen-key-btn');
                 if (this.currentUser.keys.length === 0) {

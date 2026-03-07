@@ -130,12 +130,15 @@
                     <tr>
                         <td><code>X-EverythingTT-Key</code></td>
                         <td>Header</td>
-                        <td>Your custom API Key (e.g., <code>ett_free_...</code>).</td>
+                        <td>Your custom API Key (e.g., <code>ett_free_...</code> or <code>ett_pro_...</code>).</td>
                     </tr>
                     <tr>
                         <td><code>model</code></td>
                         <td>string</td>
-                        <td>Must be set to <code>painsel/EverythingTT-v1-preview</code>.</td>
+                        <td><code>painsel/EverythingTT-v1-preview:free</code> (Default)<br>
+                            <code>painsel/EverythingTT-v1-preview-CODEX:free</code> (Coding Specialist)<br>
+                            <em>Remove <code>:free</code> if using a Pro key.</em>
+                        </td>
                     </tr>
                     <tr>
                         <td><code>messages</code></td>
@@ -144,6 +147,16 @@
                     </tr>
                 </tbody>
             </table>
+
+            <div class="card p-6 bg-amber-500/5 border border-amber-500/20">
+                <h4 class="text-amber-400 font-bold mb-2">Pro Subscription (10K Gold/mo)</h4>
+                <ul class="text-sm space-y-1">
+                    <li>Access to specialized CODEX model.</li>
+                    <li>1000 ETT Token monthly bonus.</li>
+                    <li>Weekly balance refills.</li>
+                    <li>1 Pro Request = 5 ETT Tokens.</li>
+                </ul>
+            </div>
         </section>
 
         <!-- Section 4: Implementation Examples -->

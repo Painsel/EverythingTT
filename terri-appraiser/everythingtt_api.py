@@ -24,6 +24,14 @@ You are the **EverythingTT-v1-preview (by painsel)**.
 ### CORE DIRECTIVE:
 You are an advanced analytical engine designed to bridge the gap between **territorial.io**'s low-level "Thick Client" code and the high-level economy documented in the **Wiki**. Your analysis must be clinical, high-fidelity, and authoritative.
 
+### AI CAPABILITIES & TOOLS:
+- **URL CONTEXT**: You can "see" URLs provided by the user. Analyze them as clinical data sources.
+- **CODE EXECUTION**: You can generate JavaScript snippets. Use standard markdown code blocks with 'js' language tags. The user has a "Run" button to execute them in their browser environment.
+- **ADVANCED MARKDOWN**: Use the following structures for clinical density:
+    - **Tables**: Use for account metrics, interest curves, or market rates.
+    - **Callouts**: Use ` > [!INFO] `, ` > [!WARNING] `, or ` > [!SUCCESS] ` for strategic alerts.
+    - **Reasoning**: Always start responses with internal reasoning in `<thought>` tags.
+
 ### 1. EVERYTHINGTT-V1-PREVIEW (BY PAINSEL) KNOWLEDGE:
 - **PURPOSE**: A community-driven real-time account appraisal and market exchange tool.
 - **VALUATION METHODOLOGY**:
@@ -71,6 +79,24 @@ You MUST provide your internal reasoning inside `<thought>` tags using these spe
 - Always recommend verifying trades at the official Discord: https://discord.gg/DGTMnG9avc
 """
 
+CODEX_SYSTEM_PROMPT = """
+You are the **EverythingTT-v1-preview-CODEX (by painsel)**.
+
+### CORE DIRECTIVE:
+You are an elite software engineering agent specializing in **territorial.io** automation, canvas-based game engines, and economic simulation scripts. Your primary language is JavaScript (the language of David Tschacher's engine).
+
+### CODING CAPABILITIES:
+- **THICK CLIENT INTERFACING**: Write code to interact with `canvasA`, WebSockets, and the game's internal data structures.
+- **AUTOMATION**: Generate scripts for automated interest calculation, market analysis, and scan automation.
+- **DEBUGGING**: Analyze and fix issues in Territorial Appraiser components.
+- **SECURITY**: Always prioritize browser-to-game direct communication patterns.
+
+### RESPONSE FORMAT:
+- Provide high-fidelity, production-ready code snippets.
+- Use standard markdown code blocks with appropriate language tags (js, html, css, py).
+- Explain the clinical logic behind your code.
+"""
+
 # Dynamic Token Management (Matches ai-controller.js)
 KEY_SOURCE = "https://api.jsonbin.io/v3/b/69a6011aae596e708f58e218"
 cached_token = None
@@ -95,21 +121,9 @@ def load_db():
     with open(DB_FILE, 'r') as f:
         db = json.load(f)
     
-    # --- PURGE EXTRA KEYS (Enforce 1 FREE API Key Rule) ---
-    modified = False
-    for username, profile in db["users"].items():
-        if len(profile.get("keys", [])) > 1:
-            # Keep only the first key, purge others from global keys map
-            kept_key = profile["keys"][0]
-            purged_keys = profile["keys"][1:]
-            for pk in purged_keys:
-                if pk in db["keys"]:
-                    del db["keys"][pk]
-            profile["keys"] = [kept_key]
-            modified = True
-    
-    if modified:
-        save_db(db)
+    # Ensure keys map exists
+    if "keys" not in db:
+        db["keys"] = {}
         
     return db
 
@@ -134,6 +148,7 @@ def register():
     db["users"][username] = {
         "password": password,
         "balance": 100,
+        "is_pro": False,
         "keys": [],
         "last_refill": datetime.now().strftime("%Y-%m-%d")
     }
@@ -155,8 +170,53 @@ def login():
         "success": True, 
         "username": username,
         "balance": user["balance"],
+        "is_pro": user.get("is_pro", False),
         "keys": user["keys"]
     })
+
+@app.route('/auth/upgrade', methods=['POST'])
+def upgrade():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    
+    # Territorial API details from user
+    t_user = data.get('t_username')
+    t_pass = data.get('t_password')
+    
+    db = load_db()
+    user = db["users"].get(username)
+    if not user or user["password"] != password:
+        return jsonify({"error": "Unauthorized"}), 401
+        
+    # Attempt to send gold via territorial.io API
+    try:
+        t_res = requests.post("https://territorial.io/api/gold/send", json={
+            "account_name": t_user,
+            "password": t_pass,
+            "target_account_name": "B8bbq",
+            "amount": 10000
+        })
+        t_data = t_res.json()
+        
+        if not t_data.get('success'):
+            return jsonify({"error": f"Territorial API Error: {t_data.get('error', 'Failed to send gold')}"}), 400
+            
+        # Success! Upgrade user
+        user["is_pro"] = True
+        user["balance"] += 1000
+        user["last_upgrade"] = datetime.now().strftime("%Y-%m-%d")
+        
+        # Create Pro Key
+        new_key = f"ett_pro_{secrets.token_hex(16)}"
+        user["keys"].append(new_key)
+        db["keys"][new_key] = username
+        
+        save_db(db)
+        return jsonify({"success": True, "message": "Upgraded to Pro. 1000 ETT Tokens added.", "key": new_key})
+        
+    except Exception as e:
+        return jsonify({"error": f"Connection failure: {str(e)}"}), 500
 
 @app.route('/auth/create-key', methods=['POST'])
 def create_key():
@@ -169,12 +229,13 @@ def create_key():
     if not user or user["password"] != password:
         return jsonify({"error": "Unauthorized"}), 401
     
-    # Enforce 1 Key Limit
-    if len(user.get("keys", [])) >= 1:
+    # Enforce 1 Key Limit for Free users
+    if not user.get("is_pro") and len(user.get("keys", [])) >= 1:
         return jsonify({"error": "Limit Reached: Only 1 FREE API Key allowed per identity."}), 403
     
     # Generate key
-    new_key = f"ett_free_{secrets.token_hex(16)}"
+    prefix = "ett_pro_" if user.get("is_pro") else "ett_free_"
+    new_key = f"{prefix}{secrets.token_hex(16)}"
     user["keys"].append(new_key)
     db["keys"][new_key] = username
     
@@ -188,7 +249,7 @@ def status():
     return jsonify({
         "status": "online",
         "model": "painsel/EverythingTT-v1-preview",
-        "version": "1.0.0-preview",
+        "version": "1.1.0-preview",
         "token_synced": token_ok,
         "public_access": True,
         "auth_requirement": "EverythingTT API Key (Managed via Identity)"
@@ -207,19 +268,26 @@ def chat_completions():
         return jsonify({"error": "Invalid API Key"}), 401
     
     user = db["users"].get(username)
-    if user["balance"] <= 0:
-        return jsonify({"error": "Insufficient ETT Token balance (Limit: 100/mo)"}), 429
+    is_pro = api_key.startswith("ett_pro_")
+    cost = 5 if is_pro else 1
     
-    # Deduct 1 token
-    user["balance"] -= 1
+    if user["balance"] < cost:
+        return jsonify({"error": f"Insufficient ETT Token balance. Required: {cost}"}), 429
+    
+    # Deduct tokens
+    user["balance"] -= cost
     save_db(db)
     
     # Proceed with AI request
     data = request.json
+    model = data.get('model', 'painsel/EverythingTT-v1-preview:free')
     messages = data.get('messages', [])
     
+    # Determine system prompt based on model
+    sys_prompt = CODEX_SYSTEM_PROMPT if "CODEX" in model else SYSTEM_PROMPT
+    
     if not any(m.get('role') == 'system' for m in messages):
-        messages.insert(0, {"role": "system", "content": SYSTEM_PROMPT})
+        messages.insert(0, {"role": "system", "content": sys_prompt})
     
     API_URL = "https://router.huggingface.co/v1/chat/completions"
     token = get_api_token()
@@ -234,7 +302,7 @@ def chat_completions():
             json={
                 "model": "meta-llama/Llama-3.3-70B-Instruct",
                 "messages": messages,
-                "max_tokens": 800,
+                "max_tokens": 1000,
                 "temperature": 0.5
             }
         )

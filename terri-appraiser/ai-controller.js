@@ -6,8 +6,12 @@
  */
 
 const AI_CONFIG = {
+    // Models
+    languageModel: "painsel/EverythingTT-v1-preview:free",
+    codexModel: "painsel/EverythingTT-v1-preview-CODEX:free",
+    currentModel: "painsel/EverythingTT-v1-preview:free",
+    
     // Branded EverythingTT-v1-preview Endpoint (Local -> Ngrok Ephemeral)
-    model: "painsel/EverythingTT-v1-preview", 
     endpoint: "https://kecia-ungreeted-neologically.ngrok-free.dev/v1/chat/completions",
     // Fallback to Global Brain if local is offline
     fallbackEndpoint: "https://router.huggingface.co/v1/chat/completions",
@@ -171,6 +175,20 @@ const AI = {
             }
         } else {
             modal.classList.add('hidden-modal');
+        }
+    },
+
+    setEngine(type) {
+        if (type === 'language') {
+            AI_CONFIG.currentModel = AI_CONFIG.languageModel;
+            document.getElementById('model-tab-lang')?.classList.add('active');
+            document.getElementById('model-tab-codex')?.classList.remove('active');
+            this.addMessage("System", "Engine switched to <strong>General Analysis</strong>.");
+        } else if (type === 'codex') {
+            AI_CONFIG.currentModel = AI_CONFIG.codexModel;
+            document.getElementById('model-tab-lang')?.classList.remove('active');
+            document.getElementById('model-tab-codex')?.classList.add('active');
+            this.addMessage("System", "Engine switched to <strong>CODEX (Elite Coding)</strong>.");
         }
     },
 
@@ -519,9 +537,9 @@ const AI = {
                         method: 'POST',
                         headers: headers,
                         body: JSON.stringify({
-                            model: isBranded ? AI_CONFIG.model : "meta-llama/Llama-3.3-70B-Instruct",
+                            model: isBranded ? AI_CONFIG.currentModel : "meta-llama/Llama-3.3-70B-Instruct",
                             messages: requestMessages,
-                            max_tokens: 800,
+                            max_tokens: 1000,
                             temperature: 0.5,
                             top_p: 0.95
                         })
